@@ -1,0 +1,26 @@
+* {box-sizing: border-box;}
+
+body {
+  background-color: #202322;
+  color: white;
+  font-family: Roboto, sans-serif;
+  font-size: 20px;
+  margin: auto;
+  max-width: 600px;
+  padding-left: 25px;
+  padding-right: 25px;
+  overflow-y: scroll;
+}
+
+::-webkit-scrollbar {
+  background: #202322;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(255, 255, 255);
+  border-radius: 7px;
+  border: 3px solid rgb(22,22,22);
+}
+
+h1 {
+	font-size: 34px;
+}

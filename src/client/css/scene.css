@@ -1,0 +1,32 @@
+.scene {
+
+}
+
+.option {
+  
+}
+
+.optionLink {
+  color: #64ed98;
+}
+
+.optionLink:not(:hover) {
+  text-decoration: none;
+}
+
+.optionDisabled {
+  color: rgb(83, 83, 83);
+}
+.optionBrokenLink {
+  color: #f53838;
+}
+
+.optionSeparator {
+  height: 20px;
+  list-style-type: none;
+}
+
+.credit {
+  color: grey;
+  font-size: 75%;
+}

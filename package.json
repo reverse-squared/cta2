@@ -1,0 +1,27 @@
+{
+  "name": "cta2",
+  "description": "Boilerplate code for making a server side app using React, Socket.io, and TypeScript.",
+  "version": "1.0.0",
+  "author": "Dave Caruso",
+  "scripts": {
+    "start": "node src/tools/check-env && fullstack-system dev",
+    "build": "fullstack-system build",
+    "clean": "fullstack-system clean",
+    "production": "fullstack-system production",
+    "prettier": "prettier --write 'src/**/*.ts' 'src/**/*.tsx' 'src/**/*.js' 'content/**/*.json'"
+  },
+  "dependencies": {
+    "@types/fs-extra": "^8.0.1",
+    "fs-extra": "^8.1.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
+  },
+  "devDependencies": {
+    "chalk": "^3.0.0",
+    "clsx": "^1.0.4",
+    "fullstack-system": "^2.5.0",
+    "json-schema-defaults": "^0.4.0",
+    "jsonschema": "^1.2.5",
+    "typescript": "^3.5.3"
+  }
+}
