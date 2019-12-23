@@ -1,4 +1,6 @@
-* {box-sizing: border-box;}
+* {
+  box-sizing: border-box;
+}
 
 body {
   background-color: #202322;
@@ -13,14 +15,14 @@ body {
 }
 
 ::-webkit-scrollbar {
-  background: #202322;
+  background: #191b1b;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgb(255, 255, 255);
+  background: #64ed98;
   border-radius: 7px;
-  border: 3px solid rgb(22,22,22);
+  border: 3px solid #191b1b;
 }
 
 h1 {
-	font-size: 34px;
+  font-size: 34px;
 }

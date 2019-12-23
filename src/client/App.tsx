@@ -1,18 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Game from './SceneRenderer';
+import Game, { createGameState } from './Game';
 
 import './css/global.css';
 
-import scene from '../../content/cta_dev_test/test.json';
-import { useSceneData } from './useSceneData';
-
+const state = createGameState('cta_dev_test/test');
 function App() {
-  const state = useRef<{ scene: string; [key: string]: any }>({ scene: 'cta_dev_test/test' });
-
   return (
     <>
       <h1>cta2 engine</h1>
-      <Game id={state.current.scene} state={state.current} />
+      <Game state={state} />
     </>
   );
 }

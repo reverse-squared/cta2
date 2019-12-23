@@ -13,7 +13,12 @@ export interface Scene {
   onDeactivate?: MathExpressionString;
   onFirstDeactivate?: MathExpressionString;
 
-  css?: string; // custom css
+  /** Custom CSS */
+  css?: string;
+
+  /** A list of scenes that the game should preload while the game is idling on this scene.
+   * it is automatically set to all possible option destinations. */
+  preloadScenes?: string[];
 }
 
 export interface Option {
