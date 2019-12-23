@@ -73,7 +73,7 @@ function Game({ state }: GameProps) {
   const handleOptionClick = useCallback(
     (ev: AnchorClickEvent) => {
       ev.preventDefault();
-      if (scene !== null) {
+      if (scene !== null && scene.type === 'scene') {
         const index = parseInt(ev.currentTarget.getAttribute('option-id') || '');
         const option = scene.options[index];
         if (option !== 'separator') {
@@ -92,27 +92,26 @@ function Game({ state }: GameProps) {
     if (!scene) {
       return;
     }
-    if (scene.onActivate) {
-      evalMath(scene.onActivate);
-    }
-    if (!state.visitedScenes.includes(state.scene) && scene.onFirstActivate) {
-      evalMath(scene.onFirstActivate);
-    }
-    return () => {
-      if (scene.onDeactivate) {
-        evalMath(scene.onDeactivate);
+    if (scene.type === 'scene') {
+      if (scene.onActivate) {
+        evalMath(scene.onActivate);
       }
-      if (!state.visitedScenes.includes(state.scene)) {
-        if (scene.onFirstDeactivate) {
-          evalMath(scene.onFirstDeactivate);
+      if (!state.visitedScenes.includes(state.scene) && scene.onFirstActivate) {
+        evalMath(scene.onFirstActivate);
+      }
+      return () => {
+        if (scene.onDeactivate) {
+          evalMath(scene.onDeactivate);
         }
-        state.visitedScenes.push(state.scene);
-      }
-    };
+        if (!state.visitedScenes.includes(state.scene)) {
+          if (scene.onFirstDeactivate) {
+            evalMath(scene.onFirstDeactivate);
+          }
+          state.visitedScenes.push(state.scene);
+        }
+      };
+    }
   }, [scene]);
-
-  useDebugValue(state);
-  useDebugValue(scene);
 
   if (scene === null) {
     return null;
@@ -124,39 +123,70 @@ function Game({ state }: GameProps) {
     <div className={'scene'}>
       {scene.css && <style>{scene.css}</style>}
       <FancyText text={scene.passage} />
-      <ul>
-        {scene.options.concat('separator').map((option, i) => {
-          if (option === 'separator') {
-            if (justOutputtedSeparator) {
-              return null;
-            } else {
-              justOutputtedSeparator = true;
-              return <li key={i} className={clsx('option', 'optionSeparator')}></li>;
-            }
-          } else {
-            let visible = true;
-            if (option.isVisible) {
-              visible = !!evalMath(option.isVisible);
-            }
-            if (visible) {
-              justOutputtedSeparator = false;
-              let disabled = false;
-              if (option.isDisabled) {
-                disabled = !!evalMath(option.isDisabled);
+      {scene.type === 'scene' ? (
+        <>
+          <ul>
+            {scene.options.concat('separator').map((option, i) => {
+              if (option === 'separator') {
+                if (justOutputtedSeparator) {
+                  return null;
+                } else {
+                  justOutputtedSeparator = true;
+                  return <li key={i} className={clsx('option', 'optionSeparator')}></li>;
+                }
+              } else {
+                let visible = true;
+                if (option.isVisible) {
+                  visible = !!evalMath(option.isVisible);
+                }
+                if (visible) {
+                  justOutputtedSeparator = false;
+                  let disabled = false;
+                  if (option.isDisabled) {
+                    disabled = !!evalMath(option.isDisabled);
+                  }
+                  return (
+                    <li key={i} className={clsx('option', disabled && 'optionDisabled')}>
+                      <a
+                        className={'optionLink'}
+                        href='#'
+                        onClick={handleOptionClick}
+                        option-id={i}
+                      >
+                        <FancyText text={option.label} />
+                      </a>
+                    </li>
+                  );
+                }
               }
-              return (
-                <li key={i} className={clsx('option', disabled && 'optionDisabled')}>
-                  <a className={'optionLink'} href='#' onClick={handleOptionClick} option-id={i}>
-                    <FancyText text={option.label} />
-                  </a>
-                </li>
-              );
-            }
-          }
-        })}
-      </ul>
+            })}
+          </ul>
+        </>
+      ) : (
+        <>
+          {/* <p>You've found a new ending!</p> */}
+          <div className={'ending'}>
+            <div className={'endingTitle'}>
+              <FancyText text={scene.title} />
+            </div>
+            <div className={'endingDescription'}>
+              <FancyText text={scene.description} />
+            </div>
+          </div>
+          <ul>
+            <li className={clsx('option')}>
+              <a className={'optionLink'} href='#' onClick={handleOptionClick} option-id={'end'}>
+                End Game
+              </a>
+            </li>
+          </ul>
+        </>
+      )}
       {scene.source !== null && (
-        <p className={'source'}>Scene Contributed from {formatSource(scene.source)}</p>
+        <p className={'source'}>
+          {scene.type === 'scene' ? 'Scene' : 'Ending'} Contributed from{' '}
+          {formatSource(scene.source)}
+        </p>
       )}
     </div>
   );

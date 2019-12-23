@@ -3,9 +3,12 @@ export type MathExpressionString = string | string[];
 /** Text sent through the Fancy Text Maker system */
 export type FancyTextMakerString = string;
 
-export interface Scene {
+export type Scene = NormalScene | EndingScene;
+
+export interface NormalScene {
+  type: 'scene';
   passage: FancyTextMakerString;
-  options: (Option | 'separator')[]; // the options you have
+  options: Option[]; // the options you have
   source: null | Source | Source[]; // who made the scene
 
   onActivate?: MathExpressionString;
@@ -20,19 +23,31 @@ export interface Scene {
    * it is automatically set to all possible option destinations. */
   preloadScenes?: string[];
 }
+export interface EndingScene {
+  type: 'ending';
+  passage: FancyTextMakerString;
+  title: FancyTextMakerString;
+  description: FancyTextMakerString;
+  source: null | Source | Source[]; // who made the scene
 
-export interface Option {
-  label: string;
-  to: string;
-
-  /** If option is visible at all */
-  isVisible?: MathExpressionString;
-  /** If visible and greyed out. Requires isVisible to be true */
-  isDisabled?: MathExpressionString;
-
-  /** Run when clicked on. */
-  onActivate?: MathExpressionString;
+  /** Custom CSS */
+  css?: string;
 }
+
+export type Option =
+  | 'separator'
+  | {
+      label: string;
+      to: string;
+
+      /** If option is visible at all */
+      isVisible?: MathExpressionString;
+      /** If visible and greyed out. Requires isVisible to be true */
+      isDisabled?: MathExpressionString;
+
+      /** Run when clicked on. */
+      onActivate?: MathExpressionString;
+    };
 
 /** Who made something. */
 export type Source = string | { name: string; desc?: string };
