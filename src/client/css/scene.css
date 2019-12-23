@@ -1,13 +1,13 @@
 .scene {
-
 }
 
 .option {
-  
+  color: #64ed98;
+  list-style: square;
 }
 
 .optionLink {
-  color: #64ed98;
+  color: inherit;
 }
 
 .optionLink:not(:hover) {
@@ -15,6 +15,7 @@
 }
 
 .optionDisabled {
+  pointer-events: none;
   color: rgb(83, 83, 83);
 }
 .optionBrokenLink {
@@ -26,7 +27,8 @@
   list-style-type: none;
 }
 
-.credit {
+.source {
+  margin-top: 70px;
   color: grey;
   font-size: 75%;
 }

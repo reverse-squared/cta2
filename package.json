@@ -12,7 +12,11 @@
   },
   "dependencies": {
     "@types/fs-extra": "^8.0.1",
+<<<<<<< HEAD
     "discord.js": "^11.5.1",
+=======
+    "expr-eval": "^2.0.2",
+>>>>>>> 76b491fa59dbdcfa1a807aff7410e5cf48eb5c50
     "fs-extra": "^8.1.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
