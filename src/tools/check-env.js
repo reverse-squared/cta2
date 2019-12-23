@@ -22,5 +22,8 @@ try {
   }
 } catch (error) {
   console.log(chalk.yellowBright('Error parsing env.json, generating a new one.'));
-  fs.writeJsonSync(path.join(__dirname, '../../env.json'), generateDefaults(schema), { spaces: 2 });
+  fs.writeJsonSync(path.join(__dirname, '../../env.json'), {
+    "$schema": "./env.schema.json",
+    ...generateDefaults(schema)
+  }, { spaces: 2 });
 }
