@@ -22,6 +22,8 @@ export interface NormalScene {
   /** A list of scenes that the game should preload while the game is idling on this scene.
    * it is automatically set to all possible option destinations. */
   preloadScenes?: string[];
+
+  meta?: any;
 }
 export interface EndingScene {
   type: 'ending';
@@ -32,6 +34,8 @@ export interface EndingScene {
 
   /** Custom CSS */
   css?: string;
+
+  meta?: any;
 }
 
 export type Option =

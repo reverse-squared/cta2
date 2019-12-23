@@ -8,6 +8,7 @@ const requests: Array<string> = [];
 
 function createErrorScene(id: string, error: any): Scene {
   return {
+    type: 'scene',
     passage: `An Error Occurred in scene \`${id}\`\n\n\`\`\`${
       error instanceof Error ? error.message : String(error)
     }\`\`\``,
@@ -19,6 +20,7 @@ function createErrorScene(id: string, error: any): Scene {
     ],
     css: 'body{background:#232020}',
     source: null,
+    meta: 'error',
   };
 }
 

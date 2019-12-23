@@ -31,7 +31,10 @@ export function createGameState(startingScene: string): GameState {
 const listFormatter = new (Intl as any).ListFormat('en', { style: 'long', type: 'conjunction' });
 const parser = new Parser();
 
-function formatSource(input: Source | Source[]): string {
+function formatSource(input: Source | Source[] | null): string {
+  if (input === null) {
+    return 'No one';
+  }
   if (Array.isArray(input)) {
     return listFormatter.format(input.map((x) => formatSource(x)));
   } else {

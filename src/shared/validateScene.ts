@@ -29,6 +29,7 @@ export function validateOption(x: unknown, name = 'option'): Option {
     'isVisible',
     'isDisabled',
     'onActivate',
+    'meta',
   ]);
 
   if (!objectHasProperty(x, 'label')) {
@@ -116,6 +117,7 @@ export function validateScene(x: unknown, name = 'scene'): Scene {
       'onDeactivate',
       'onFirstDeactivate',
       'preloadScenes',
+      'meta',
     ]);
 
     if (!objectHasProperty(x, 'options')) {
