@@ -1,3 +1,13 @@
 {
-  "words": ["clsx", "rerender", "scrollbar"]
+  "words": [
+    "clsx",
+    "rerender",
+    "scrollbar",
+    "upvote",
+    "downvote",
+    "upvotes",
+    "downvotes",
+    "mkdirs",
+    "mkdirp"
+  ]
 }

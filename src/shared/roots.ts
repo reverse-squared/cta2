@@ -1,4 +1,4 @@
 import path from 'path';
 
-export const contentRoot = path.join(process.cwd(), 'content');
-export const requestedScenesRoot = path.join(process.cwd(), 'requested-scenes');
+export const contentRoot = path.join(__dirname, '../../content');
+export const requestedScenesRoot = path.join(__dirname, '../../requested-scenes');

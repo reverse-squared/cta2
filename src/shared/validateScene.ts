@@ -121,6 +121,10 @@ export function validateScene(x: unknown, name = 'scene'): Scene {
     if (!objectHasProperty(x, 'options')) {
       throw new ValidationError(name + '.options is missing');
     }
+    if (!Array.isArray(x.options)) {
+      throw new ValidationError(name + '.options is not type `Option[]`');
+    }
+    x.options.forEach((option, i) => validateOption(option, `scene.options[${i}]`));
 
     if (
       objectHasProperty(x, 'preloadScenes') &&
