@@ -8,6 +8,7 @@ import env from '../shared/env';
 import { requestedScenesRoot, contentRoot } from '../shared/roots';
 import getFilesRecursively from './utils/getFilesRecursively';
 import { createScene } from '../server/scene';
+import { connectToDatabase } from '../server/database';
 
 let bot: Discord.Client;
 let votingChannel: Discord.TextChannel;
@@ -27,6 +28,8 @@ const VOTING_PERIOD = 10000;
 
 export function initBot() {
   if (env.bot.token && env.bot.votingChannel) {
+    connectToDatabase();
+
     bot = new Discord.Client();
     bot.login(env.bot.token);
 
