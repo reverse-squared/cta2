@@ -8,7 +8,7 @@ import FancyText from './FancyText';
 
 import './css/scene.css';
 import { AnchorClickEvent } from './type-shorthand';
-import { useSceneData } from './useSceneData';
+import { useSceneData, deleteSceneFromCache } from './useSceneData';
 
 interface GameState {
   [key: string]: any;
@@ -67,7 +67,6 @@ function Game({ state }: GameProps) {
           throw error;
         }
       }
-      console.log(`Evaluating ${expr} to`, output);
       return output;
     },
     [state]
@@ -83,7 +82,11 @@ function Game({ state }: GameProps) {
           if (option.onActivate) {
             evalMath(option.onActivate);
           }
-          state.scene = path.resolve('/' + path.dirname(state.scene), option.to).substr(1);
+          if (option.to === '@refresh') {
+            deleteSceneFromCache(state.scene);
+          } else {
+            state.scene = path.resolve('/' + path.dirname(state.scene), option.to).substr(1);
+          }
           rerender();
         }
       }

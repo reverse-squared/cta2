@@ -6,6 +6,7 @@ import { Scene } from '../shared/types';
 
 import env from '../shared/env';
 import { requestedScenesRoot, contentRoot } from '../shared/roots';
+import { createScene } from '../server/scene';
 
 let bot: Discord.Client;
 let votingChannel: Discord.TextChannel;
@@ -74,14 +75,11 @@ export async function postScene(name: string, scene: Scene) {
   await message.react('👍');
   await message.react('👎');
 
-  const filePath = name.split('/');
-  filePath[filePath.length - 1] += '.json';
-
   await fs.mkdirs(path.join(requestedScenesRoot, path.dirname(name)));
 
   // Create a JSON file.
   await fs.writeFile(
-    path.join(requestedScenesRoot, ...filePath),
+    path.join(requestedScenesRoot, name + '.json'),
     JSON.stringify({
       ...scene,
       createdOn: new Date().valueOf(),
@@ -110,10 +108,9 @@ export async function postScene(name: string, scene: Scene) {
 
     // If there are more upvotes than downvotes.
     if (upvotes > downvotes) {
-      await fs.mkdirs(path.join(contentRoot, path.dirname(`${name}`)));
-      await fs.writeFile(path.join(contentRoot, ...filePath), JSON.stringify(scene));
+      await createScene(name, scene);
     }
-    await fs.unlink(path.join(requestedScenesRoot, ...filePath));
+    await fs.unlink(path.join(requestedScenesRoot, name + '.json'));
   }
 
   // Delete the message.
