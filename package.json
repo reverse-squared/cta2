@@ -8,7 +8,11 @@
     "build": "fullstack-system build",
     "clean": "fullstack-system clean",
     "production": "fullstack-system production",
-    "prettier": "prettier --write 'src/**/*.ts' 'src/**/*.tsx' 'src/**/*.js' 'content/**/*.json'"
+    "prettier": "prettier --write 'src/**/*.ts' 'src/**/*.tsx' 'src/**/*.js' 'content/**/*.json'",
+    "docs": "docsify serve docs"
+  },
+  "directories": {
+    "doc": "docs"
   },
   "dependencies": {
     "@types/fs-extra": "^8.0.1",
@@ -22,6 +26,7 @@
   "devDependencies": {
     "chalk": "^3.0.0",
     "clsx": "^1.0.4",
+    "docsify": "^4.10.2",
     "fullstack-system": "^2.7.2",
     "json-schema-defaults": "^0.4.0",
     "jsonschema": "^1.2.5",
