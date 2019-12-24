@@ -1,0 +1,175 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CTA 2.0 Scene",
+  "type": "object",
+  "oneOf": [
+    {
+      "properties": {
+        "type": {
+          "enum": ["scene", "ending"]
+        }
+      }
+    },
+    {
+      "properties": {
+        "type": {
+          "const": "scene"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              },
+              "isVisible": {
+                "type": "string"
+              },
+              "isDisabled": {
+                "type": "string"
+              },
+              "onActivate": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "preloadScenes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "onActivate": {
+          "type": "string"
+        },
+        "onFirstActivate": {
+          "type": "string"
+        },
+        "onDeactivate": {
+          "type": "string"
+        },
+        "onFirstDeactivate": {
+          "type": "string"
+        },
+        "css": {
+          "type": "string"
+        },
+        "passage": {
+          "type": "string"
+        },
+        "source": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "desc": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "required": ["name"],
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "desc": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "type": {
+          "const": "ending"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "onActivate": {
+          "type": "string"
+        },
+        "onFirstActivate": {
+          "type": "string"
+        },
+        "css": {
+          "type": "string"
+        },
+        "passage": {
+          "type": "string"
+        },
+        "source": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "desc": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "required": ["name"],
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "desc": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

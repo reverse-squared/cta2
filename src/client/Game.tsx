@@ -1,35 +1,22 @@
 import React, { useCallback, useMemo, useState, useEffect, useDebugValue } from 'react';
 import clsx from 'clsx';
 import path from 'path';
-import { Parser } from 'expr-eval/dist/bundle';
-
-import { Source } from '../shared/types';
+import { Source, Scene } from '../shared/types';
 import FancyText from './FancyText';
-
-import './css/scene.css';
 import { AnchorClickEvent } from './type-shorthand';
 import { useSceneData, deleteSceneFromCache } from './useSceneData';
+import { GameState, evalMath, goToScene } from './gameState';
+import './css/scene.css';
+import { SceneEditor } from './SceneEditor';
 
-interface GameState {
-  [key: string]: any;
-  scene: string;
-  visitedScenes: string[];
-}
-
-interface GameProps {
+export interface GameProps {
   state: GameState;
-  disabled?: boolean;
-}
-
-export function createGameState(startingScene: string): GameState {
-  return {
-    scene: startingScene,
-    visitedScenes: [],
+  editorPreview?: {
+    scene: Scene;
   };
 }
 
 const listFormatter = new (Intl as any).ListFormat('en', { style: 'long', type: 'conjunction' });
-const parser = new Parser();
 
 function formatSource(input: Source | Source[] | null): string {
   if (input === null) {
@@ -46,52 +33,33 @@ function formatSource(input: Source | Source[] | null): string {
   }
 }
 
-function Game({ state }: GameProps) {
+function Game({ state, editorPreview }: GameProps) {
   const [, setRenderNumber] = useState(0);
   const rerender = () => setRenderNumber(Math.random());
 
   if (!state.visitedScenes) state.visitedScenes = [];
 
-  const scene = useSceneData(state.scene);
-
-  const evalMath = useCallback(
-    (input: string | string[]) => {
-      const expr = Array.isArray(input) ? input.map((x) => `(${x})`).join('and') : input;
-      let output;
-      try {
-        output = parser.evaluate(expr, state);
-      } catch (error) {
-        if (String(error).includes('undefined variable')) {
-          output = undefined;
-        } else {
-          throw error;
-        }
-      }
-      return output;
-    },
-    [state]
-  );
+  const scene = editorPreview ? editorPreview.scene : useSceneData(state.scene);
 
   const handleOptionClick = useCallback(
     (ev: AnchorClickEvent) => {
       ev.preventDefault();
+      if (editorPreview) {
+        return;
+      }
       if (scene !== null && scene.type === 'scene') {
         const index = parseInt(ev.currentTarget.getAttribute('option-id') || '');
         const option = scene.options[index];
         if (option !== 'separator') {
           if (option.onActivate) {
-            evalMath(option.onActivate);
+            evalMath(state, option.onActivate);
           }
-          if (option.to === '@refresh') {
-            deleteSceneFromCache(state.scene);
-          } else {
-            state.scene = path.resolve('/' + path.dirname(state.scene), option.to).substr(1);
-          }
+          goToScene(state, option.to);
           rerender();
         }
       }
     },
-    [scene, evalMath]
+    [scene]
   );
 
   useEffect(() => {
@@ -100,18 +68,18 @@ function Game({ state }: GameProps) {
     }
     if (scene.type === 'scene') {
       if (scene.onActivate) {
-        evalMath(scene.onActivate);
+        evalMath(state, scene.onActivate);
       }
       if (!state.visitedScenes.includes(state.scene) && scene.onFirstActivate) {
-        evalMath(scene.onFirstActivate);
+        evalMath(state, scene.onFirstActivate);
       }
       return () => {
         if (scene.onDeactivate) {
-          evalMath(scene.onDeactivate);
+          evalMath(state, scene.onDeactivate);
         }
         if (!state.visitedScenes.includes(state.scene)) {
           if (scene.onFirstDeactivate) {
-            evalMath(scene.onFirstDeactivate);
+            evalMath(state, scene.onFirstDeactivate);
           }
           state.visitedScenes.push(state.scene);
         }
@@ -122,78 +90,84 @@ function Game({ state }: GameProps) {
   if (scene === null) {
     return null;
   }
+  if (!editorPreview && scene.meta === 'scene-editor') {
+    return <SceneEditor state={state} />;
+  }
 
   let justOutputtedSeparator = true;
 
   return (
-    <div className={'scene'}>
-      {scene.css && <style>{scene.css}</style>}
-      <FancyText text={scene.passage} />
-      {scene.type === 'scene' ? (
-        <>
-          <ul>
-            {scene.options.concat('separator').map((option, i) => {
-              if (option === 'separator') {
-                if (justOutputtedSeparator) {
-                  return null;
-                } else {
-                  justOutputtedSeparator = true;
-                  return <li key={i} className={clsx('option', 'optionSeparator')}></li>;
-                }
-              } else {
-                let visible = true;
-                if (option.isVisible) {
-                  visible = !!evalMath(option.isVisible);
-                }
-                if (visible) {
-                  justOutputtedSeparator = false;
-                  let disabled = false;
-                  if (option.isDisabled) {
-                    disabled = !!evalMath(option.isDisabled);
+    <div className='sceneWrap'>
+      <div className={'scene'}>
+        <h1>live editing demo</h1>
+        {scene.css && <style>{scene.css}</style>}
+        <FancyText state={state} text={scene.passage} />
+        {scene.type === 'scene' ? (
+          <>
+            <ul>
+              {scene.options.concat('separator').map((option, i) => {
+                if (option === 'separator') {
+                  if (justOutputtedSeparator) {
+                    return null;
+                  } else {
+                    justOutputtedSeparator = true;
+                    return <li key={i} className={clsx('option', 'optionSeparator')}></li>;
                   }
-                  return (
-                    <li key={i} className={clsx('option', disabled && 'optionDisabled')}>
-                      <a
-                        className={'optionLink'}
-                        href='#'
-                        onClick={handleOptionClick}
-                        option-id={i}
-                      >
-                        <FancyText text={option.label} />
-                      </a>
-                    </li>
-                  );
+                } else {
+                  let visible = true;
+                  if (option.isVisible) {
+                    visible = !!evalMath(state, option.isVisible);
+                  }
+                  if (visible) {
+                    justOutputtedSeparator = false;
+                    let disabled = false;
+                    if (option.isDisabled) {
+                      disabled = !!evalMath(state, option.isDisabled);
+                    }
+                    return (
+                      <li key={i} className={clsx('option', disabled && 'optionDisabled')}>
+                        <a
+                          className={'optionLink'}
+                          href='#'
+                          onClick={handleOptionClick}
+                          option-id={i}
+                        >
+                          <FancyText state={state} text={option.label} />
+                        </a>
+                      </li>
+                    );
+                  }
                 }
-              }
-            })}
-          </ul>
-        </>
-      ) : (
-        <>
-          {/* <p>You've found a new ending!</p> */}
-          <div className={'ending'}>
-            <div className={'endingTitle'}>
-              <FancyText text={scene.title} />
+              })}
+            </ul>
+          </>
+        ) : (
+          <>
+            {/* <p>You've found a new ending!</p> */}
+            <div className={'ending'}>
+              <div className={'endingTitle'}>
+                <FancyText state={state} text={scene.title} />
+              </div>
+              <div className={'endingDescription'}>
+                <FancyText state={state} text={scene.description} />
+              </div>
             </div>
-            <div className={'endingDescription'}>
-              <FancyText text={scene.description} />
-            </div>
-          </div>
-          <ul>
-            <li className={clsx('option')}>
-              <a className={'optionLink'} href='#' onClick={handleOptionClick} option-id={'end'}>
-                End Game
-              </a>
-            </li>
-          </ul>
-        </>
-      )}
-      {scene.source !== null && (
-        <p className={'source'}>
-          {scene.type === 'scene' ? 'Scene' : 'Ending'} Contributed from{' '}
-          {formatSource(scene.source)}
-        </p>
-      )}
+            <ul>
+              <li className={clsx('option')}>
+                <a className={'optionLink'} href='#' onClick={handleOptionClick} option-id={'end'}>
+                  End Game
+                </a>
+              </li>
+            </ul>
+          </>
+        )}
+        {scene.source !== null && (
+          <p className={'source'}>
+            {scene.type === 'scene' ? 'Scene' : 'Ending'} Contributed from{' '}
+            {formatSource(scene.source)}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

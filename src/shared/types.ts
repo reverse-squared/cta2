@@ -32,6 +32,9 @@ export interface EndingScene {
   description: FancyTextMakerString;
   source: null | Source | Source[]; // who made the scene
 
+  onActivate?: MathExpressionString;
+  onFirstActivate?: MathExpressionString;
+
   /** Custom CSS */
   css?: string;
 

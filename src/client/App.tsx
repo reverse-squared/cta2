@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Game, { createGameState } from './Game';
+import Game from './Game';
 
 import './css/global.css';
+import { createGameState } from './gameState';
 
-const state = createGameState('cta_dev_test/test');
+const state = createGameState('built-in/start');
+
 function App() {
   return (
     <>
-      <h1>cta2 engine</h1>
       <Game state={state} />
     </>
   );
