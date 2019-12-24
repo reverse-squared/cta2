@@ -109,7 +109,8 @@ async function watchForVoting(request: SceneRequest) {
       if (!reactingUser) return false;
 
       return (
-        ['✅', '❌'].includes(reaction.emoji.name) && reactingUser.roles.has('658727143551008779')
+        ['✅', '❌'].includes(reaction.emoji.name) &&
+        reactingUser.roles.has(env.bot.moderatorRoleId)
       );
     },
     { time: request.ends - Date.now() }
@@ -139,8 +140,8 @@ async function watchForVoting(request: SceneRequest) {
   setTimeout(async () => {
     const message = await votingChannel.fetchMessage(request.discordMessageId);
 
-    const upvotes = message.reactions.find((react) => react.emoji.name === '✅').count;
-    const downvotes = message.reactions.find((react) => react.emoji.name === '❌').count;
+    const upvotes = message.reactions.find((react) => react.emoji.name === '👍').count - 1;
+    const downvotes = message.reactions.find((react) => react.emoji.name === '👎').count - 1;
 
     if (upvotes > downvotes) {
       createScene(request.id, request.scene);
