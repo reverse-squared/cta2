@@ -4,6 +4,10 @@ import path from 'path';
 
 import { initBot } from '../discord-bot/bot';
 import { getScene } from './scene';
+import { connectToDatabase } from './database';
+
+// Connect to the database
+connectToDatabase();
 
 // Start the Discord bot;
 initBot();

@@ -1,7 +1,5 @@
-import path from 'path';
-import fs from 'fs-extra';
-import { contentRoot } from '../shared/roots';
 import { Scene } from '../shared/types';
+import { ctaDb, runDb } from './database';
 
 /** Returns boolean if scene exists */
 export async function sceneExists(id: string): Promise<boolean> {
@@ -11,8 +9,16 @@ export async function sceneExists(id: string): Promise<boolean> {
   if (!id.includes('/')) {
     return false;
   }
-  const jsonPath = path.join(contentRoot, id + '.json');
-  return await fs.pathExists(jsonPath);
+
+  const response = await runDb(
+    ctaDb()
+      .table('scenes')
+      .getAll(id)
+      .count()
+      .eq(1)
+  );
+
+  return response;
 }
 
 /** Returns Scene or null if no exist */
@@ -23,16 +29,22 @@ export async function getScene(id: string): Promise<Scene | null> {
   if (!id.includes('/')) {
     return null;
   }
-  const jsonPath = path.join(contentRoot, id + '.json');
-  if (await fs.pathExists(jsonPath)) {
-    return (await fs.readJSON(jsonPath)) as Scene;
+
+  const response = await runDb(
+    ctaDb()
+      .table('scenes')
+      .get(id)
+  );
+
+  if (response) {
+    return response as Scene;
   } else {
     return null;
   }
 }
 
 /** Returns Scene or null if no exist */
-export async function createScene(id: string, scene: Scene, overwrite: boolean = false) {
+export async function createScene(id: string, scene: Scene) {
   if (id.includes('..')) {
     throw new Error('Scene name cannot contain ..');
   }
@@ -45,13 +57,25 @@ export async function createScene(id: string, scene: Scene, overwrite: boolean =
   if (id.match(/\.json.*\//)) {
     throw new Error('Scene namespaces cannot contain the string ".json"');
   }
-  const jsonPath = path.join(contentRoot, id + '.json');
-  const exists = await fs.pathExists(jsonPath);
-  if (exists && !overwrite) {
-    throw new Error(
-      'Scene already exists, pass optional third argument `overwrite` to modify the scene file.'
-    );
+  if (id.match(/@/)) {
+    throw new Error('Scene names cannot contain the @ symbol');
   }
-  await fs.mkdirs(path.join(contentRoot, path.dirname(jsonPath)));
-  await fs.writeJson(jsonPath, scene);
+
+  const exists = await runDb(
+    ctaDb()
+      .table('scenes')
+      .getAll(id)
+      .count()
+      .eq(1)
+  );
+
+  if (exists) {
+    throw new Error(`Scene ${id} already exists`);
+  }
+
+  await runDb(
+    ctaDb()
+      .table('scenes')
+      .insert({ id: id, scene: scene })
+  );
 }

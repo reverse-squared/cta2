@@ -1,9 +1,15 @@
-import r from 'rethinkdb';
+import r, { Operation } from 'rethinkdb';
+
+const DB_NAME = 'cta2';
 
 export let connection: r.Connection;
 
 export async function connectToDatabase() {
-  connection = await r.connect({ host: 'localhost', port: 28015, db: 'cta2' });
+  connection = await r.connect({ host: 'localhost', port: 28015 });
+
+  if (!(await r.dbList().run(connection)).includes(DB_NAME)) {
+    await r.dbCreate(DB_NAME).run(connection);
+  }
 
   async function createTable(name: string, options: r.TableOptions, secondaryIndexes: string[]) {
     const existingTables = await r
@@ -28,6 +34,16 @@ export async function connectToDatabase() {
     }
   }
 
-  await createTable('scenes', { primary_key: 'sceneName' }, ['type']);
-  await createTable('suggestion', { primary_key: 'sceneName' }, []);
+  await createTable('scenes', {}, ['type']);
+  await createTable('suggestion', { primary_key: 'uuid' }, ['id']);
+}
+
+export function ctaDb() {
+  return r.db(DB_NAME);
+}
+export async function runDb<T>(operation: Operation<T>): Promise<T> {
+  if (!connection) {
+    throw new Error('Connection not established. Please Wait.');
+  }
+  return operation.run(connection);
 }

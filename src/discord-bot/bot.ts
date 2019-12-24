@@ -2,38 +2,24 @@ import Discord from 'discord.js';
 import fs from 'fs-extra';
 import path from 'path';
 
-import { Scene, NormalScene, EndingScene } from '../shared/types';
+import { Scene } from '../shared/types';
 
 import env from '../shared/env';
-import { requestedScenesRoot, contentRoot } from '../shared/roots';
-import getFilesRecursively from './utils/getFilesRecursively';
 import { createScene } from '../server/scene';
-import { connectToDatabase } from '../server/database';
+import { createRequestInDb, SceneRequest, deleteRequest, getAllRequests } from './requests';
+
+const EMBED_COLOR = 0x64ed98;
 
 let bot: Discord.Client;
 let votingChannel: Discord.TextChannel;
 let archiveChannel: Discord.TextChannel;
 
-interface RequestedNormalScene extends NormalScene {
-  createdOn: number;
-  discordMessageId: string;
-}
-interface RequestedEndingScene extends EndingScene {
-  createdOn: number;
-  discordMessageId: string;
-}
-type RequestedScene = RequestedNormalScene | RequestedEndingScene;
-
-const VOTING_PERIOD = 10000;
-
 export function initBot() {
   if (env.bot.token && env.bot.votingChannel) {
-    connectToDatabase();
-
     bot = new Discord.Client();
     bot.login(env.bot.token);
 
-    bot.on('ready', () => {
+    bot.on('ready', async () => {
       bot.user.setActivity('Adventuring...');
 
       const guild = bot.guilds.get(env.bot.homeGuild);
@@ -44,348 +30,8 @@ export function initBot() {
       votingChannel = guild.channels.get(env.bot.votingChannel) as Discord.TextChannel;
       archiveChannel = guild.channels.get(env.bot.archiveChannel) as Discord.TextChannel;
 
-      // Get all the files inside of requested-scenes.
-      getFilesRecursively(requestedScenesRoot, (error: any, res: string[]) => {
-        if (error) {
-          throw new Error(error);
-        }
-
-        async function checkResults(fileName: string, scene: RequestedScene) {
-          const message = await votingChannel.fetchMessage(scene.discordMessageId);
-          const messageReactions = message.reactions;
-          const addOverrideReaction = messageReactions.get('✅');
-          const removeOverrideReaction = messageReactions.get('❌');
-          const upvoteReactions = messageReactions.get('👍');
-          const downvoteReactions = messageReactions.get('👎');
-
-          // This part should only matter when we are booting up.
-          if (addOverrideReaction) {
-            // FIXME: This does not work because the users collection is empty. Discord.JS issue probably.
-            // const addOverridee = addOverrideReaction.users.first().tag;
-
-            createScene(fileName.substring(17).replace('.json', ''), scene);
-
-            const forcedEmbed =
-              scene.type === 'scene'
-                ? {
-                    color: 0x64ed98,
-                    title: `New Scene: ${fileName.substring(17).replace('.json', '')}`,
-                    description: scene.passage,
-                    fields: scene.options.map((option) => {
-                      if (option === 'separator') {
-                        return {
-                          name: '​',
-                          value: '​',
-                        };
-                      }
-
-                      return {
-                        name: option.label,
-                        value: `Goes to \`${option.to}\`.`,
-                      };
-                    }),
-                    timestamp: new Date(),
-                    footer: {
-                      text: 'Force added by: Unknown',
-                    },
-                  }
-                : {
-                    color: 0x64ed98,
-                    title: `New Ending: ${fileName.substring(17).replace('.json', '')}`,
-                    description: scene.passage,
-                    // TODO: add the rest
-                    timestamp: new Date(),
-                    footer: {
-                      text: 'Force added by: Unknwon',
-                    },
-                  };
-            archiveChannel.send({ embed: forcedEmbed });
-
-            // Delete the message.
-            message.delete();
-
-            // Delete the request file.
-            await fs.unlink(path.join(requestedScenesRoot, fileName.substring(17)));
-
-            return;
-          } else if (removeOverrideReaction) {
-            // FIXME: This does not work because the users collection is empty. Discord.JS issue probably.
-            // const removeOverridee = removeOverrideReaction.users.first().tag;
-
-            const forcedEmbed =
-              scene.type === 'scene'
-                ? {
-                    color: 0x64ed98,
-                    title: `New Scene: ${fileName.substring(17).replace('.json', '')}`,
-                    description: scene.passage,
-                    fields: scene.options.map((option) => {
-                      if (option === 'separator') {
-                        return {
-                          name: '​',
-                          value: '​',
-                        };
-                      }
-
-                      return {
-                        name: option.label,
-                        value: `Goes to \`${option.to}\`.`,
-                      };
-                    }),
-                    timestamp: new Date(),
-                    footer: {
-                      text: 'Force removed by: Unknown',
-                    },
-                  }
-                : {
-                    color: 0x64ed98,
-                    title: `New Ending: ${fileName.substring(17).replace('.json', '')}`,
-                    description: scene.passage,
-                    // TODO: add the rest
-                    timestamp: new Date(),
-                    footer: {
-                      text: 'Force removed by: Unknown',
-                    },
-                  };
-            archiveChannel.send({ embed: forcedEmbed });
-
-            // Delete the message.
-            message.delete();
-
-            // Delete the request file.
-            await fs.unlink(path.join(requestedScenesRoot, fileName.substring(17)));
-
-            return;
-          }
-
-          const upvotes = upvoteReactions ? upvoteReactions.count - 1 : 0;
-          const downvotes = downvoteReactions ? downvoteReactions.count - 1 : 0;
-
-          // Check if not enough votes were casted.
-          if (!upvotes && !downvotes) {
-            const forcedEmbed =
-              scene.type === 'scene'
-                ? {
-                    color: 0x64ed98,
-                    title: `New Scene: ${fileName.substring(17).replace('.json', '')}`,
-                    description: scene.passage,
-                    fields: scene.options.map((option) => {
-                      if (option === 'separator') {
-                        return {
-                          name: '​',
-                          value: '​',
-                        };
-                      }
-
-                      return {
-                        name: option.label,
-                        value: `Goes to \`${option.to}\`.`,
-                      };
-                    }),
-                    timestamp: new Date(),
-                    footer: {
-                      text: 'Was not added because not enough votes were casted.',
-                    },
-                  }
-                : {
-                    color: 0x64ed98,
-                    title: `New Ending: ${fileName.substring(17).replace('.json', '')}`,
-                    description: scene.passage,
-                    // TODO: add the rest
-                    timestamp: new Date(),
-                    footer: {
-                      text: 'Was not added because not enough votes were casted.',
-                    },
-                  };
-            archiveChannel.send({ embed: forcedEmbed });
-
-            // Delete the message.
-            message.delete();
-
-            // Delete the request file.
-            await fs.unlink(path.join(requestedScenesRoot, fileName.substring(17)));
-
-            return;
-          }
-
-          if (upvotes > downvotes) {
-            createScene(fileName.substring(17).replace('.json', ''), scene);
-          }
-
-          // Delete the message.
-          message.delete();
-
-          // Delete the request file.
-          await fs.unlink(path.join(requestedScenesRoot, fileName.substring(17)));
-
-          // Send a archived message.
-          const embed =
-            scene.type === 'scene'
-              ? {
-                  color: 0x64ed98,
-                  title: `New Scene: ${fileName.substring(17).replace('.json', '')}`,
-                  description: scene.passage,
-                  fields: scene.options.map((option) => {
-                    if (option === 'separator') {
-                      return {
-                        name: '​',
-                        value: '​',
-                      };
-                    }
-
-                    return {
-                      name: option.label,
-                      value: `Goes to \`${option.to}\`.`,
-                    };
-                  }),
-                  timestamp: new Date(),
-                  footer: {
-                    text: `${
-                      upvotes > downvotes
-                        ? `Added with ${(upvotes / (upvotes + downvotes)) * 100}% of the vote.`
-                        : `Not added with ${(upvotes / (upvotes + downvotes)) * 100}% of the vote.`
-                    }`,
-                  },
-                }
-              : {
-                  color: 0x64ed98,
-                  title: `New Ending: ${fileName.substring(17).replace('.json', '')}`,
-                  description: scene.passage,
-                  // TODO: add the rest
-                  timestamp: new Date(),
-                  footer: {
-                    text: `${
-                      upvotes > downvotes
-                        ? `Added with ${(upvotes / (upvotes + downvotes)) * 100}% of the vote.`
-                        : `Not added with ${(upvotes / (upvotes + downvotes)) * 100}% of the vote.`
-                    }`,
-                  },
-                };
-          archiveChannel.send({ embed });
-        }
-
-        // Find all the JSON files.
-        const filesToCheck = res.filter((file) => file.endsWith('.json'));
-
-        // For each file...
-        filesToCheck.forEach(async (file) => {
-          const fileContents = await fs.readFile(path.join(process.cwd(), file));
-          const scene: RequestedScene = JSON.parse(fileContents.toString());
-
-          // If it is past the time.
-          if (scene.createdOn + VOTING_PERIOD <= Date.now()) {
-            checkResults(file, scene);
-          } else {
-            const message = await votingChannel.fetchMessage(scene.discordMessageId);
-
-            // Create a reaction collector for when an admin forces a vote.
-            const moderatorVoteCollector = message.createReactionCollector(
-              (reaction, user) => {
-                const reactingUser = message.guild.members.get(user.id);
-
-                if (!reactingUser) {
-                  throw new Error('User reacting does not exist in guild.');
-                }
-
-                return (
-                  ['✅', '❌'].includes(reaction.emoji.name) &&
-                  reactingUser.roles.has('658727143551008779')
-                );
-              },
-              { time: scene.createdOn + VOTING_PERIOD - scene.createdOn }
-            );
-
-            moderatorVoteCollector.on('collect', async (reaction) => {
-              if (reaction.emoji.name === '✅') {
-                createScene(file.substring(17).replace('.json', ''), scene);
-
-                // Delete the request file.
-                await fs.unlink(path.join(requestedScenesRoot, file.substring(17)));
-
-                const forcedEmbed =
-                  scene.type === 'scene'
-                    ? {
-                        color: 0x64ed98,
-                        title: `New Scene: ${file.substring(17).replace('.json', '')}`,
-                        description: scene.passage,
-                        fields: scene.options.map((option) => {
-                          if (option === 'separator') {
-                            return {
-                              name: '​',
-                              value: '​',
-                            };
-                          }
-
-                          return {
-                            name: option.label,
-                            value: `Goes to \`${option.to}\`.`,
-                          };
-                        }),
-                        timestamp: new Date(),
-                        footer: {
-                          text: `Force added by: ${reaction.users.first().tag}`,
-                        },
-                      }
-                    : {
-                        color: 0x64ed98,
-                        title: `New Ending: ${file.substring(17).replace('.json', '')}`,
-                        description: scene.passage,
-                        // TODO: add the rest
-                        timestamp: new Date(),
-                        footer: {
-                          text: `Force added by: ${reaction.users.first().tag}`,
-                        },
-                      };
-                archiveChannel.send({ embed: forcedEmbed });
-              } else if (reaction.emoji.name === '❌') {
-                // Delete the request file.
-                await fs.unlink(path.join(requestedScenesRoot, file.substring(17)));
-
-                const forcedEmbed =
-                  scene.type === 'scene'
-                    ? {
-                        color: 0x64ed98,
-                        title: `New Scene: ${file.substring(17).replace('.json', '')}`,
-                        description: scene.passage,
-                        fields: scene.options.map((option) => {
-                          if (option === 'separator') {
-                            return {
-                              name: '​',
-                              value: '​',
-                            };
-                          }
-
-                          return {
-                            name: option.label,
-                            value: `Goes to \`${option.to}\`.`,
-                          };
-                        }),
-                        timestamp: new Date(),
-                        footer: {
-                          text: `Force removed by: ${reaction.users.first().tag}`,
-                        },
-                      }
-                    : {
-                        color: 0x64ed98,
-                        title: `New Ending: ${file.substring(17).replace('.json', '')}`,
-                        description: scene.passage,
-                        // TODO: add the rest
-                        timestamp: new Date(),
-                        footer: {
-                          text: `Force removed by: ${reaction.users.first().tag}`,
-                        },
-                      };
-                archiveChannel.send({ embed: forcedEmbed });
-              }
-
-              message.delete();
-            });
-
-            // Check resultes when 24 hours is up.
-            setTimeout(() => {
-              checkResults(file, scene);
-            }, scene.createdOn + VOTING_PERIOD - scene.createdOn);
-          }
-        });
+      (await getAllRequests()).forEach((request) => {
+        watchForVoting(request);
       });
 
       // TODO: Make this a fancy.
@@ -394,24 +40,34 @@ export function initBot() {
   }
 }
 
-/**
- * Posts an embed to the voting channel for people to vote for it to be added.
- * @param name The scene name. Also the location where the file is saved.
- * @param scene The scene to post to the voting channel.
- */
-export async function postScene(name: string, scene: Scene) {
-  // Check if a suggestion already exists for this scene.
-  if (await fs.pathExists(path.join(requestedScenesRoot, name + '.json'))) {
-    throw new Error('Suggestion already exists for this scene.');
-  }
+function getDiscordEmbed(
+  id: string,
+  scene: Scene,
+  time: number,
+  state: 'open' | 'closed-accept' | 'closed-deny' | 'force-accept' | 'force-deny',
+  upvotes?: number,
+  downvotes?: number
+) {
+  const embedBase = {
+    color: EMBED_COLOR,
+    footer:
+      state === 'open'
+        ? 'Voting Open!'
+        : `Voting Ended | Scene ${
+            {
+              'closed-accept': 'Added',
+              'closed-deny': 'Not Added',
+              'force-accept': 'Forcefully Added by Moderator',
+              'force-deny': 'Forcefully Not Added by Moderator',
+            }[state]
+          } | ${upvotes} 👍, ${downvotes} 👎`,
+    timestamp: time,
+  };
 
-  const timeCreated = new Date();
-
-  const embed =
+  const sceneEmbedPart =
     scene.type === 'scene'
       ? {
-          color: 0x64ed98,
-          title: `New Scene: ${name}`,
+          title: `New Scene: ${id}`,
           description: scene.passage,
           fields: scene.options.map((option) => {
             if (option === 'separator') {
@@ -426,252 +82,104 @@ export async function postScene(name: string, scene: Scene) {
               value: `Goes to \`${option.to}\`.`,
             };
           }),
-          timestamp: timeCreated,
         }
       : {
-          color: 0x64ed98,
-          title: `New Ending: ${name}`,
+          title: `New Ending: ${id}`,
           description: scene.passage,
           // TODO: add the rest
-          timestamp: timeCreated,
         };
 
-  const message = (await votingChannel.send({
-    embed: embed,
-  })) as Discord.Message;
+  return {
+    ...embedBase,
+    ...sceneEmbedPart,
+  };
+}
 
-  await message.react('👍');
-  await message.react('👎');
-
-  await fs.mkdirs(path.join(requestedScenesRoot, path.dirname(name)));
-
-  // Create a JSON file.
-  await fs.writeFile(
-    path.join(requestedScenesRoot, name + '.json'),
-    JSON.stringify({
-      ...scene,
-      createdOn: new Date().valueOf(),
-      discordMessageId: message.id,
-    })
-  );
+async function watchForVoting(request: SceneRequest) {
+  const message = await votingChannel.fetchMessage(request.discordMessageId);
+  if (!message) {
+    // todo: log and delete the request
+    throw new Error('Message does not exist.');
+  }
 
   // Create a reaction collector for when an admin forces a vote.
   const moderatorVoteCollector = message.createReactionCollector(
     (reaction, user) => {
       const reactingUser = message.guild.members.get(user.id);
-
-      if (!reactingUser) {
-        throw new Error('User reacting does not exist in guild.');
-      }
+      if (!reactingUser) return false;
 
       return (
         ['✅', '❌'].includes(reaction.emoji.name) && reactingUser.roles.has('658727143551008779')
       );
     },
-    { time: VOTING_PERIOD }
+    { time: request.ends - Date.now() }
   );
-
-  let shouldDoFinalCollect = true;
 
   moderatorVoteCollector.on('collect', async (reaction) => {
     if (reaction.emoji.name === '✅') {
-      createScene(name, scene);
+      // accept
+      createScene(request.id, request.scene);
 
-      const forcedEmbed =
-        scene.type === 'scene'
-          ? {
-              color: 0x64ed98,
-              title: `New Scene: ${name}`,
-              description: scene.passage,
-              fields: scene.options.map((option) => {
-                if (option === 'separator') {
-                  return {
-                    name: '​',
-                    value: '​',
-                  };
-                }
-
-                return {
-                  name: option.label,
-                  value: `Goes to \`${option.to}\`.`,
-                };
-              }),
-              timestamp: timeCreated,
-              footer: {
-                text: `Force added by: ${reaction.users.first().tag}`,
-              },
-            }
-          : {
-              color: 0x64ed98,
-              title: `New Ending: ${name}`,
-              description: scene.passage,
-              // TODO: add the rest
-              timestamp: new Date(),
-              footer: {
-                text: `Force added by: ${reaction.users.first().tag}`,
-              },
-            };
-      archiveChannel.send({ embed: forcedEmbed });
+      archiveChannel.send({
+        embed: getDiscordEmbed(request.id, request.scene, request.ends, 'force-accept'),
+      });
     } else if (reaction.emoji.name === '❌') {
-      // Delete the request file.
-      await fs.unlink(path.join(requestedScenesRoot, name + '.json'));
-
-      const forcedEmbed =
-        scene.type === 'scene'
-          ? {
-              color: 0x64ed98,
-              title: `New Scene: ${name}`,
-              description: scene.passage,
-              fields: scene.options.map((option) => {
-                if (option === 'separator') {
-                  return {
-                    name: '​',
-                    value: '​',
-                  };
-                }
-
-                return {
-                  name: option.label,
-                  value: `Goes to \`${option.to}\`.`,
-                };
-              }),
-              timestamp: timeCreated,
-              footer: {
-                text: `Force removed by: ${reaction.users.first().tag}`,
-              },
-            }
-          : {
-              color: 0x64ed98,
-              title: `New Ending: ${name}`,
-              description: scene.passage,
-              // TODO: add the rest
-              timestamp: new Date(),
-              footer: {
-                text: `Force removed by: ${reaction.users.first().tag}`,
-              },
-            };
-      archiveChannel.send({ embed: forcedEmbed });
+      // delete
+      archiveChannel.send({
+        embed: getDiscordEmbed(request.id, request.scene, request.ends, 'force-deny'),
+      });
+    } else {
+      return;
     }
 
     message.delete();
-    shouldDoFinalCollect = false;
+    deleteRequest(request.uuid);
   });
 
-  // The reactions that were collected after 24 hours.
-  const collectedReactions: Discord.Collection<
-    string,
-    Discord.MessageReaction
-  > = await message.awaitReactions(
-    (reaction, user) => {
-      return ['👍', '👎'].includes(reaction.emoji.name) && user.id !== message.author.id;
-    },
-    { time: VOTING_PERIOD }
-  );
+  setTimeout(async () => {
+    const message = await votingChannel.fetchMessage(request.discordMessageId);
 
-  if (shouldDoFinalCollect) {
-    // If we have at least one reaction on either side.
-    if (collectedReactions.size > 0) {
-      let upvoteReaction = collectedReactions.get('👍');
-      let downvoteReaction = collectedReactions.get('👎');
+    const upvotes = message.reactions.find((react) => react.emoji.name === '✅').count;
+    const downvotes = message.reactions.find((react) => react.emoji.name === '❌').count;
 
-      const upvotes = upvoteReaction ? upvoteReaction.count - 1 : 0;
-      const downvotes = downvoteReaction ? downvoteReaction.count - 1 : 0;
-
-      // If there are more upvotes than downvotes.
-      if (upvotes > downvotes) {
-        createScene(name, scene);
-      }
-
-      // Delete request file.
-      await fs.unlink(path.join(requestedScenesRoot, name + '.json'));
-
-      // Send a archived message.
-      const embed =
-        scene.type === 'scene'
-          ? {
-              color: 0x64ed98,
-              title: `New Scene: ${name}`,
-              description: scene.passage,
-              fields: scene.options.map((option) => {
-                if (option === 'separator') {
-                  return {
-                    name: '​',
-                    value: '​',
-                  };
-                }
-
-                return {
-                  name: option.label,
-                  value: `Goes to \`${option.to}\`.`,
-                };
-              }),
-              timestamp: new Date(),
-              footer: {
-                text: `${
-                  upvotes > downvotes
-                    ? `Added with ${(upvotes / (upvotes + downvotes)) * 100}% of the vote.`
-                    : `Not with ${(upvotes / (upvotes + downvotes)) * 100}% of the vote.`
-                }`,
-              },
-            }
-          : {
-              color: 0x64ed98,
-              title: `New Ending: ${name}`,
-              description: scene.passage,
-              // TODO: add the rest
-              timestamp: new Date(),
-              footer: {
-                text: `${
-                  upvotes > downvotes
-                    ? `Added with ${(upvotes / (upvotes + downvotes)) * 100}% of the vote.`
-                    : `Not with ${(upvotes / (upvotes + downvotes)) * 100}% of the vote.`
-                }`,
-              },
-            };
-
-      archiveChannel.send({ embed });
+    if (upvotes > downvotes) {
+      createScene(request.id, request.scene);
+      archiveChannel.send({
+        embed: getDiscordEmbed(
+          request.id,
+          request.scene,
+          request.ends,
+          'closed-deny',
+          upvotes,
+          downvotes
+        ),
+      });
     } else {
-      const embed =
-        scene.type === 'scene'
-          ? {
-              color: 0x64ed98,
-              title: `New Scene: ${name}`,
-              description: scene.passage,
-              fields: scene.options.map((option) => {
-                if (option === 'separator') {
-                  return {
-                    name: '​',
-                    value: '​',
-                  };
-                }
-
-                return {
-                  name: option.label,
-                  value: `Goes to \`${option.to}\`.`,
-                };
-              }),
-              timestamp: new Date(),
-              footer: {
-                text: 'Was not added because not enough votes were casted.',
-              },
-            }
-          : {
-              color: 0x64ed98,
-              title: `New Ending: ${name}`,
-              description: scene.passage,
-              // TODO: add the rest
-              timestamp: new Date(),
-              footer: {
-                text: 'Was not added because not enough votes were casted.',
-              },
-            };
-      archiveChannel.send({ embed });
-
-      // Delete the request file.
-      await fs.unlink(path.join(requestedScenesRoot, name + '.json'));
+      archiveChannel.send({
+        embed: getDiscordEmbed(
+          request.id,
+          request.scene,
+          request.ends,
+          'closed-deny',
+          upvotes,
+          downvotes
+        ),
+      });
     }
+  }, request.ends - Date.now());
+}
 
-    // Delete the message.
-    message.delete();
-  }
+export async function postSceneNew(id: string, scene: Scene) {
+  const now = Date.now();
+
+  const embed = getDiscordEmbed(id, scene, now, 'open');
+
+  const message = (await votingChannel.send({ embed: embed })) as Discord.Message;
+
+  await message.react('👍');
+  await message.react('👎');
+
+  const request = await createRequestInDb(id, scene, message.id, now);
+
+  watchForVoting(request);
 }
