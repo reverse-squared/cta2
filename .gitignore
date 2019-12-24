@@ -1,4 +1,4 @@
 node_modules
 env.json
-content/
 requested-scenes/
+rethinkdb_data/

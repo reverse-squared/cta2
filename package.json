@@ -19,9 +19,10 @@
     "glob": "^7.1.6",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-monaco-editor": "^0.32.1"
+    "rethinkdb": "^2.4.2"
   },
   "devDependencies": {
+    "@types/rethinkdb": "^2.3.14",
     "@types/react-monaco-editor": "^0.16.0",
     "chalk": "^3.0.0",
     "clsx": "^1.0.4",
@@ -29,6 +30,7 @@
     "json-schema-defaults": "^0.4.0",
     "jsonschema": "^1.2.5",
     "monaco-editor-webpack-plugin": "^1.8.1",
+    "react-monaco-editor": "^0.32.1",
     "typescript": "^3.5.3"
   }
 }
