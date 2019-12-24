@@ -23,7 +23,7 @@ interface RequestedEndingScene extends EndingScene {
 }
 type RequestedScene = RequestedNormalScene | RequestedEndingScene;
 
-const VOTING_PERIOD = 86400000;
+const VOTING_PERIOD = 10000;
 
 export function initBot() {
   if (env.bot.token && env.bot.votingChannel) {
@@ -660,7 +660,7 @@ export async function postScene(name: string, scene: Scene) {
       archiveChannel.send({ embed });
 
       // Delete the request file.
-      await fs.unlink(path.join(requestedScenesRoot, ...filePath));
+      await fs.unlink(path.join(requestedScenesRoot, name + '.json'));
     }
 
     // Delete the message.
