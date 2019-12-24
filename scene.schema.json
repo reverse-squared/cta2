@@ -69,7 +69,6 @@
             },
             {
               "type": "object",
-              "required": ["name"],
               "properties": {
                 "name": {
                   "type": "string"
@@ -88,7 +87,6 @@
                   },
                   {
                     "type": "object",
-                    "required": ["name"],
                     "properties": {
                       "name": {
                         "type": "string"
@@ -135,7 +133,6 @@
             },
             {
               "type": "object",
-              "required": ["name"],
               "properties": {
                 "name": {
                   "type": "string"
@@ -154,7 +151,6 @@
                   },
                   {
                     "type": "object",
-                    "required": ["name"],
                     "properties": {
                       "name": {
                         "type": "string"

@@ -2,6 +2,7 @@ import { Parser } from 'expr-eval/dist/bundle';
 import { StringObject } from './type-shorthand';
 import { deleteSceneFromCache } from './useSceneData';
 import path from 'path';
+import { setEndingAsAchieved, isEndingAchieved, setEndingAsNotAchieved } from './ending';
 
 const parser = new Parser();
 
@@ -10,6 +11,7 @@ export interface GameState {
   scene: string;
   prevScene: string;
   visitedScenes: string[];
+  isEndingAchieved: (id: string) => boolean;
 }
 
 export function createGameState(startingScene: string): GameState {
@@ -17,6 +19,9 @@ export function createGameState(startingScene: string): GameState {
     scene: startingScene,
     prevScene: '@null',
     visitedScenes: [],
+    isEndingAchieved: isEndingAchieved,
+    setEndingAsAchieved: setEndingAsAchieved,
+    setEndingAsNotAchieved: setEndingAsNotAchieved,
   };
 }
 
