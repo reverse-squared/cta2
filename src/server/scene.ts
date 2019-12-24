@@ -39,7 +39,7 @@ export async function createScene(id: string, scene: Scene, overwrite: boolean =
   if (!id.includes('/')) {
     throw new Error('Scene name has no namespace folder');
   }
-  if (!id.endsWith('/')) {
+  if (id.endsWith('/')) {
     throw new Error('Scene name cannot be a folder');
   }
   if (id.match(/\.json.*\//)) {

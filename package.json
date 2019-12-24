@@ -16,6 +16,7 @@
     "expr-eval": "^2.0.2",
     "fs-extra": "^8.1.0",
     "monaco-editor": "^0.19.0",
+    "glob": "^7.1.6",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-monaco-editor": "^0.32.1"
