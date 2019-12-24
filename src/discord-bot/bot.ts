@@ -435,25 +435,17 @@ export async function postScene(name: string, scene: Scene) {
   await message.react('👍');
   await message.react('👎');
 
-  const filePath = name.split('/');
-  filePath[filePath.length - 1] += '.json';
-
   await fs.mkdirs(path.join(requestedScenesRoot, path.dirname(name)));
 
   // Create a JSON file.
   await fs.writeFile(
-    path.join(requestedScenesRoot, ...filePath),
+    path.join(requestedScenesRoot, name + '.json'),
     JSON.stringify({
       ...scene,
       createdOn: new Date().valueOf(),
       discordMessageId: message.id,
     })
   );
-
-  async function createScene(scene: Scene) {
-    await fs.mkdirs(path.join(contentRoot, path.dirname(`${name}`)));
-    await fs.writeFile(path.join(contentRoot, ...filePath), JSON.stringify(scene));
-  }
 
   // Create a reaction collector for when an admin forces a vote.
   const moderatorVoteCollector = message.createReactionCollector(
@@ -475,7 +467,7 @@ export async function postScene(name: string, scene: Scene) {
 
   moderatorVoteCollector.on('collect', async (reaction) => {
     if (reaction.emoji.name === '✅') {
-      createScene(scene);
+      createScene(name, scene);
 
       const forcedEmbed =
         scene.type === 'scene'
@@ -514,7 +506,7 @@ export async function postScene(name: string, scene: Scene) {
       archiveChannel.send({ embed: forcedEmbed });
     } else if (reaction.emoji.name === '❌') {
       // Delete the request file.
-      await fs.unlink(path.join(requestedScenesRoot, ...filePath));
+      await fs.unlink(path.join(requestedScenesRoot, name + '.json'));
 
       const forcedEmbed =
         scene.type === 'scene'
@@ -579,11 +571,11 @@ export async function postScene(name: string, scene: Scene) {
 
       // If there are more upvotes than downvotes.
       if (upvotes > downvotes) {
-        createScene(scene);
+        createScene(name, scene);
       }
 
       // Delete request file.
-      await fs.unlink(path.join(requestedScenesRoot, ...filePath));
+      await fs.unlink(path.join(requestedScenesRoot, name + '.json'));
 
       // Send a archived message.
       const embed =

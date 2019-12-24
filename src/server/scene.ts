@@ -52,5 +52,6 @@ export async function createScene(id: string, scene: Scene, overwrite: boolean =
       'Scene already exists, pass optional third argument `overwrite` to modify the scene file.'
     );
   }
-  fs.writeJson(jsonPath, scene);
+  await fs.mkdirs(path.join(contentRoot, path.dirname(jsonPath)));
+  await fs.writeJson(jsonPath, scene);
 }
