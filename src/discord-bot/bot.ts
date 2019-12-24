@@ -397,6 +397,11 @@ export function initBot() {
  * @param scene The scene to post to the voting channel.
  */
 export async function postScene(name: string, scene: Scene) {
+  // Check if a suggestion already exists for this scene.
+  if (await fs.pathExists(path.join(requestedScenesRoot, name + '.json'))) {
+    throw new Error('Suggestion already exists for this scene.');
+  }
+
   const timeCreated = new Date();
 
   const embed =
