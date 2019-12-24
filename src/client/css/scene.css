@@ -1,4 +1,12 @@
+.sceneWrap {
+  overflow-y: scroll;
+  height: 100%;
+}
 .scene {
+  margin: auto;
+  max-width: 550px;
+  padding-left: 25px;
+  padding-right: 25px;
 }
 
 .option {

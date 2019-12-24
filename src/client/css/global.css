@@ -3,15 +3,18 @@
 }
 
 body {
+  margin: 0;
   background-color: #202322;
   color: white;
   font-family: Roboto, sans-serif;
   font-size: 20px;
-  margin: auto;
-  max-width: 550px;
-  padding-left: 25px;
-  padding-right: 25px;
-  overflow-y: scroll;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#root {
+  flex: 1;
 }
 
 ::-webkit-scrollbar {
