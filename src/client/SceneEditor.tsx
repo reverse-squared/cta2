@@ -1,5 +1,5 @@
 import React, { useState, Component, useRef, useCallback, useEffect, useMemo } from 'react';
-import { GameState } from './gameState';
+import { GameState, createGameState } from './gameState';
 import { createErrorScene } from './useSceneData';
 import MonacoEditor from 'react-monaco-editor';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
@@ -87,14 +87,7 @@ export function SceneEditor({ state }: SceneEditorProps) {
     previewedScene = createErrorScene(sceneEditorId, error);
   }
 
-  const passedState = useMemo(
-    () => ({
-      prevScene: '@null',
-      scene: sceneEditorId,
-      visitedScenes: [],
-    }),
-    [code]
-  );
+  const passedState = useMemo(() => createGameState(sceneEditorId), [code]);
 
   return (
     <div className='editor'>
