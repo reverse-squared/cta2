@@ -1,6 +1,7 @@
 export interface Env {
   bot: {
     token: string | null;
+    homeGuild: string;
     votingChannel: string;
     archiveChannel: string;
   };
