@@ -31,6 +31,7 @@ export interface EndingScene {
   title: FancyTextMakerString;
   description: FancyTextMakerString;
   source: null | Source | Source[]; // who made the scene
+  views: number;
 
   onActivate?: MathExpressionString;
   onFirstActivate?: MathExpressionString;
