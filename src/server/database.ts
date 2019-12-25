@@ -1,4 +1,5 @@
 import r, { Operation } from 'rethinkdb';
+import { EndingScene } from '../shared/types';
 
 const DB_NAME = 'cta2';
 
@@ -46,4 +47,18 @@ export async function runDb<T>(operation: Operation<T>): Promise<T> {
     throw new Error('Connection not established. Please Wait.');
   }
   return operation.run(connection);
+}
+
+export async function getAllEndings() {
+  const allEndings: EndingScene[] = await runDb(
+    ctaDb()
+      .table('scenes')
+      .getAll('ending', { index: 'type' }).coerceTo('array')
+  );
+
+  return allEndings.map((ending) => {
+    return {
+      id: ending.
+    }
+  });
 }
