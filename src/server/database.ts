@@ -50,15 +50,17 @@ export async function runDb<T>(operation: Operation<T>): Promise<T> {
 }
 
 export async function getAllEndings() {
-  const allEndings: EndingScene[] = await runDb(
+  const allEndings = await runDb(
     ctaDb()
       .table('scenes')
-      .getAll('ending', { index: 'type' }).coerceTo('array')
+      .getAll('ending', { index: 'type' })
+      .coerceTo('array')
   );
 
   return allEndings.map((ending) => {
     return {
-      id: ending.
-    }
+      id: ending.id,
+      title: ending.scene.title,
+    };
   });
 }
