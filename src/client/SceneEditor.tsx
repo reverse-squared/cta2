@@ -2,6 +2,7 @@ import React, { useState, Component, useRef, useCallback, useEffect, useMemo } f
 import { GameState, createGameState } from './gameState';
 import MonacoEditor from 'react-monaco-editor';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import { moveIndex } from '@reverse/array';
 
 import './css/editor.css';
 import Game from './Game';
@@ -253,6 +254,44 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
 
     updateScene(scene);
   }
+  function handleMoveOptionUp(index: number) {
+    if (scene.type === 'ending') {
+      return;
+    }
+    if (index === 0) {
+      return;
+    }
+
+    scene.options = moveIndex(scene.options, index, index - 1);
+    updateScene(scene);
+  }
+  function handleMoveOptionDown(index: number) {
+    if (scene.type === 'ending') {
+      return;
+    }
+    if (index === scene.options.length - 1) {
+      return;
+    }
+
+    scene.options = moveIndex(scene.options, index, index + 1);
+    updateScene(scene);
+  }
+  function handleMoveSourceUp(index: number) {
+    if (index === 0) {
+      return;
+    }
+
+    scene.source = moveIndex(scene.source, index, index - 1);
+    updateScene(scene);
+  }
+  function handleMoveSourceDown(index: number) {
+    if (index === scene.source.length - 1) {
+      return;
+    }
+
+    scene.source = moveIndex(scene.source, index, index + 1);
+    updateScene(scene);
+  }
 
   if (!scene) {
     return (
@@ -314,7 +353,7 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
                             value={option.label}
                             onChange={(event) => handleOptionLabelChange(index, event)}
                           />
-                          ➡️
+                          →
                           <input
                             className='spacing-right spacing-left'
                             placeholder='Link'
@@ -331,6 +370,10 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
                       >
                         Delete
                       </button>
+                    </td>
+                    <td>
+                      <button onClick={() => handleMoveOptionUp(index)}>↑</button>
+                      <button onClick={() => handleMoveOptionDown(index)}>↓</button>
                     </td>
                   </tr>
                 );
@@ -397,6 +440,8 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
             <button onClick={() => handleRemoveSource(index)} disabled={sources.length === 1}>
               Delete
             </button>
+            <button onClick={() => handleMoveSourceUp(index)}>↑</button>
+            <button onClick={() => handleMoveSourceDown(index)}>↓</button>
           </div>
         );
       })}
