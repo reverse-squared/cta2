@@ -13,6 +13,7 @@
 }
 .editorEditor {
   background-color: #23302b;
+  overflow-y: auto;
 }
 .editorPreview {
 }
@@ -130,4 +131,15 @@
 
 .veditor .checkbox .label {
   padding-left: 36px;
+}
+
+.spacing-left {
+  margin-left: 10px;
+}
+.spacing-right {
+  margin-right: 10px;
+}
+
+.veditor-separator {
+  border-bottom: 1px solid white;
 }

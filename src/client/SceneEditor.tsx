@@ -5,18 +5,12 @@ import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 import './css/editor.css';
 import Game from './Game';
-import { Scene } from '../shared/types';
+import { Scene, Source } from '../shared/types';
 import { validateScene } from '../shared/validateScene';
 
-import schema from '../../scene.schema.json';
 import { createErrorScene } from './built-in-scenes';
 import { modelUri } from './monaco-config';
-import {
-  StringObject,
-  TextareaChangeEvent,
-  SelectChangeEvent,
-  InputChangeEvent,
-} from './type-shorthand';
+import { TextareaChangeEvent, InputChangeEvent } from './type-shorthand';
 
 export interface SceneEditorProps {
   state: GameState;
@@ -43,7 +37,7 @@ const blankScene = JSON.stringify(
       },
     ],
     onFirstActivate: 'isPennyOnGround = true',
-    source: 'yourself',
+    source: [{ name: 'yourself', desc: '' }],
   },
   null,
   2
@@ -106,6 +100,10 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
     scene = null as any;
   }
 
+  while (scene.type === 'scene' && scene && scene.options[0] === 'separator') {
+    scene.options.shift();
+  }
+
   const updateScene = useCallback(
     (scene: Scene) => {
       onCodeChange(JSON.stringify(scene, null, 2));
@@ -152,17 +150,14 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
     [scene, updateScene]
   );
 
-  if (!scene) {
-    return (
-      <div>
-        <h1>Error in Scene Formatting</h1>
-        <pre>{error.stack || error}</pre>
-        <a href='#' onClick={reset}>
-          Reset your scene (Discards information)
-        </a>
-      </div>
-    );
-  }
+  const sources: Source[] =
+    scene.source === null
+      ? []
+      : typeof scene.source === 'string'
+      ? [{ name: scene.source }]
+      : Array.isArray(scene.source)
+      ? scene.source
+      : [scene.source];
 
   function handleAddAnotherOption() {
     if (scene.type === 'scene') {
@@ -174,8 +169,19 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
 
     updateScene(scene);
   }
+  function handleAddAnotherSeparator() {
+    if (scene.type === 'scene') {
+      scene.options.push('separator');
+    }
+
+    updateScene(scene);
+  }
   function handleDeleteOption(index: number) {
     if (scene.type === 'scene') {
+      if (scene.options.length === 1) {
+        return;
+      }
+
       scene.options.splice(index, 1);
 
       updateScene(scene);
@@ -206,6 +212,62 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
   function handleCssChange(ev: TextareaChangeEvent) {
     scene.css = ev.currentTarget.value;
     updateScene(scene);
+  }
+  function handleOnActivateChange(ev: TextareaChangeEvent) {
+    scene.onActivate = ev.currentTarget.value;
+    updateScene(scene);
+  }
+  function handleOnFirstActivateChange(ev: TextareaChangeEvent) {
+    scene.onFirstActivate = ev.currentTarget.value;
+    updateScene(scene);
+  }
+  function handleOnDeactivateChange(ev: TextareaChangeEvent) {
+    if (scene.type === 'scene') {
+      scene.onDeactivate = ev.currentTarget.value;
+      updateScene(scene);
+    }
+  }
+  function handleOnFirstDeactivateChange(ev: TextareaChangeEvent) {
+    if (scene.type === 'scene') {
+      scene.onFirstDeactivate = ev.currentTarget.value;
+      updateScene(scene);
+    }
+  }
+  function handleAddSource() {
+    sources.push({
+      name: '',
+      desc: '',
+    });
+    updateScene(scene);
+  }
+  function handleSourceNameChange(index: number, ev: React.ChangeEvent<HTMLInputElement>) {
+    sources[index].name = ev.currentTarget.value;
+    updateScene(scene);
+  }
+  function handleSourceDescriptionChange(index: number, ev: React.ChangeEvent<HTMLInputElement>) {
+    sources[index].desc = ev.currentTarget.value;
+    updateScene(scene);
+  }
+  function handleRemoveSource(index: number) {
+    if (sources.length === 1) {
+      return;
+    }
+
+    sources.splice(index, 1);
+
+    updateScene(scene);
+  }
+
+  if (!scene) {
+    return (
+      <div>
+        <h1>Error in Scene Formatting</h1>
+        <pre>{error.stack || error}</pre>
+        <a href='#' onClick={reset}>
+          Reset your scene (Discards information)
+        </a>
+      </div>
+    );
   }
 
   return (
@@ -238,25 +300,77 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
         <>
           <h2>Options</h2>
           <p className='helper-text'>The list of links below the Passage</p>
-          {scene.options.map((option, index) => {
-            return (
-              <div>
-                <input
-                  placeholder='Label'
-                  value={option === 'separator' ? '' : option.label}
-                  onChange={(event) => handleOptionLabelChange(index, event)}
-                />
-                <input
-                  placeholder='To'
-                  value={option === 'separator' ? '' : option.to}
-                  onChange={(event) => handleOptionToChange(index, event)}
-                />
-                <button onClick={() => handleDeleteOption(index)}>Delete</button>
-              </div>
-            );
-          })}
-          <button onClick={handleAddAnotherOption}>Add Another Option</button>
+          <table>
+            <tbody>
+              {scene.options.map((option, index) => {
+                return (
+                  <tr>
+                    <td>
+                      {option === 'separator' ? (
+                        <>
+                          <div className='veditor-separator spacing-right'></div>
+                        </>
+                      ) : (
+                        <>
+                          <input
+                            className='spacing-right'
+                            placeholder='Label'
+                            value={option.label}
+                            onChange={(event) => handleOptionLabelChange(index, event)}
+                          />
+                          ➡️
+                          <input
+                            className='spacing-right spacing-left'
+                            placeholder='Link'
+                            value={option.to}
+                            onChange={(event) => handleOptionToChange(index, event)}
+                          />
+                        </>
+                      )}
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => handleDeleteOption(index)}
+                        disabled={scene.type === 'scene' && scene.options.length === 1}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <div style={{ marginTop: '10px' }}>
+            <button onClick={handleAddAnotherOption} className='spacing-right'>
+              Add Option
+            </button>
+            <button onClick={handleAddAnotherSeparator}>Add Separator</button>
+          </div>
           <h2>[the on* things]</h2>
+          <p>onActivate</p>
+          <textarea rows={4} cols={50} value={scene.onActivate} onChange={handleOnActivateChange} />
+          <p>onFirstActivate</p>
+          <textarea
+            rows={4}
+            cols={50}
+            value={scene.onFirstActivate}
+            onChange={handleOnFirstActivateChange}
+          />
+          <p>onDeactivate</p>
+          <textarea
+            rows={4}
+            cols={50}
+            value={scene.onDeactivate}
+            onChange={handleOnDeactivateChange}
+          />
+          <p>onFirstDeactivate</p>
+          <textarea
+            rows={4}
+            cols={50}
+            value={scene.onFirstDeactivate}
+            onChange={handleOnFirstDeactivateChange}
+          />
         </>
       ) : (
         <>
@@ -271,6 +385,26 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
       </p>
       <textarea value={scene.css} onChange={handleCssChange} rows={7} cols={50} />
       <h2>[source]</h2>
+      {sources.map((source: Source, index: number) => {
+        return (
+          <div>
+            <input
+              value={source.name}
+              onChange={(event) => handleSourceNameChange(index, event)}
+              placeholder='Name'
+            />
+            <input
+              value={source.desc}
+              onChange={(event) => handleSourceDescriptionChange(index, event)}
+              placeholder='Description (Optional)'
+            />
+            <button onClick={() => handleRemoveSource(index)} disabled={sources.length === 1}>
+              Delete
+            </button>
+          </div>
+        );
+      })}
+      <button onClick={handleAddSource}>Add Another Source</button>
     </div>
   );
 }

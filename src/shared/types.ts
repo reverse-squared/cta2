@@ -9,7 +9,7 @@ export interface NormalScene {
   type: 'scene';
   passage: FancyTextMakerString;
   options: Option[]; // the options you have
-  source: null | Source | Source[]; // who made the scene
+  source: string | Source | Source[] | null; // who made the scene
 
   onActivate?: MathExpressionString;
   onFirstActivate?: MathExpressionString;
@@ -30,7 +30,7 @@ export interface EndingScene {
   passage: FancyTextMakerString;
   title: FancyTextMakerString;
   description: FancyTextMakerString;
-  source: null | Source | Source[]; // who made the scene
+  source: Source[]; // who made the scene
   views: number;
 
   onActivate?: MathExpressionString;
@@ -58,4 +58,4 @@ export type Option =
     };
 
 /** Who made something. */
-export type Source = string | { name: string; desc?: string };
+export type Source = { name: string; desc?: string };
