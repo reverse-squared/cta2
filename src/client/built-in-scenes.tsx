@@ -61,17 +61,27 @@ export function create404Scene(id: string): Scene {
 export const builtInScenes: StringObject<Scene> = {
   'built-in/start': {
     type: 'scene',
-    passage: 'Welcome to the Community Text Adventure Beta.',
+    passage:
+      'Welcome to the Community Text Adventure: Season 2 Beta. This is the second installment of Community Text Adventure where you (yes, you the player) can suggest new paths, endings, and vote on others. Be sure to join our Discord server at [https://discord.gg/ABwjpk4](https://discord.gg/ABwjpk4) to be able to vote on new scenes.\n\nYour help today will ensure the speedy and smooth release of the game on December 30th, 2019. Any scenes created before that time will not be transferred over to the released game.',
     options: [
       {
-        label: 'Start Community Text Adventure Season 2',
-        to: '@null',
+        label: 'Play the first Community Text Adventure.',
+        to: 'https://cta.davecode.me/',
         onActivate: 'reset("cta2/start")',
       },
       {
-        label: 'Scene Editor',
-        to: 'scene-editor',
-        onActivate: 'sceneEditorId="beta/editor-demo"',
+        label: 'Start Community Text Adventure: Season 2.',
+        to: '@null',
+        onActivate: 'reset("cta2/start")',
+      },
+      'separator',
+      {
+        label: 'Join the Discord Server',
+        to: 'https://discord.gg/ABwjpk4',
+      },
+      {
+        label: 'Read the Documentation',
+        to: 'https://reverse-squared.github.io/cta2/#/',
       },
     ],
     source: null,
