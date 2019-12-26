@@ -4,6 +4,12 @@
 .ftm-bold {
   font-weight: bold;
 }
+.ftm-strike {
+  text-decoration: line-through;
+}
+.ftm-underline {
+  text-decoration: underline;
+}
 .ftm-code {
   color: rgb(168, 197, 169);
   font-family: 'Roboto Mono';

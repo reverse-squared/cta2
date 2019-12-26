@@ -13,9 +13,31 @@
 }
 .editorEditor {
   background-color: #23302b;
-  overflow-y: auto;
+  position: relative;
 }
-.editorPreview {
+
+.editor-switch-container {
+  background-color: #191b1b;
+  display: flex;
+  height: 32px;
+}
+.editor-switch-button {
+  color: #aaa;
+  font-size: 18px;
+  background-color: #141b19;
+  border: 1px solid #141b19;
+}
+.editor-switch-button:focus {
+  border: 1px solid #64ed98;
+  outline: none;
+}
+.editor-switch-button.current {
+  background-color: #23302b;
+  border: 1px solid #23302b;
+  color: white;
+}
+.editor-switch-button:not(:first-child) {
+  margin-left: 10px;
 }
 
 .veditor-warning {
@@ -24,6 +46,10 @@
   margin-bottom: 50px;
 }
 
+.veditor-scroll {
+  overflow-y: auto;
+  height: 100%;
+}
 .veditor {
   margin: auto;
   max-width: 550px;
