@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "CTA 2.0 Scene",
   "type": "object",
-  "oneOf": [
+  "anyOf": [
     {
       "properties": {
         "type": {

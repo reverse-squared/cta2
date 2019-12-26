@@ -23,6 +23,12 @@ export interface GameState {
   setEndingAsNotAchieved: (id: string) => void;
 }
 
+let mainState = createGameState('built-in/start');
+
+function resetGameState(startingScene: string = 'built-in/start') {
+  mainState = createGameState(startingScene);
+}
+
 export function createGameState(startingScene: string): GameState {
   return {
     scene: startingScene,
@@ -31,6 +37,7 @@ export function createGameState(startingScene: string): GameState {
     isEndingAchieved: isEndingAchieved,
     setEndingAsAchieved: setEndingAsAchieved,
     setEndingAsNotAchieved: setEndingAsNotAchieved,
+    reset: resetGameState,
   };
 }
 

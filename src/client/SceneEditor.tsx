@@ -1,6 +1,5 @@
 import React, { useState, Component, useRef, useCallback, useEffect, useMemo } from 'react';
 import { GameState, createGameState } from './gameState';
-import { createErrorScene } from './useSceneData';
 import MonacoEditor from 'react-monaco-editor';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
