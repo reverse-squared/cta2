@@ -7,11 +7,20 @@ import { setEndingAsAchieved, isEndingAchieved, setEndingAsNotAchieved } from '.
 const parser = new Parser();
 
 export interface GameState {
+  /** Custom Variables */
   [key: string]: any;
+  /* The Current Scene */
   scene: string;
+  /* The Previous Scene, used for the "Go Back One Step" button. */
   prevScene: string;
+  /* A list of scenes you have visited already, used for running the onFirstActivate/onFirstDeactivate handlers. */
   visitedScenes: string[];
+  /* Returns true if the ending scene has been achieved, only set AFTER the ending scene has been viewed. */
   isEndingAchieved: (id: string) => boolean;
+  /* Marks an ending as achieved. */
+  setEndingAsAchieved: (id: string) => void;
+  /* Marks an ending as NOT achieved. */
+  setEndingAsNotAchieved: (id: string) => void;
 }
 
 let mainState = createGameState('built-in/start');
