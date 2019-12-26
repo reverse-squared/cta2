@@ -357,7 +357,7 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
                             value={option.label}
                             onChange={(event) => handleOptionLabelChange(index, event)}
                           />
-                          ➡️
+                          →
                           <input
                             className='spacing-right spacing-left'
                             placeholder='Link'
