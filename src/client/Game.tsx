@@ -57,7 +57,9 @@ function Game({ state, editorPreview }: GameProps) {
           if (option.onActivate) {
             evalMath(state, option.onActivate);
           }
-          goToScene(state, option.to);
+          if (option.to) {
+            goToScene(state, option.to);
+          }
           rerender();
         }
       }

@@ -46,7 +46,7 @@ export type Option =
   | 'separator'
   | {
       label: string;
-      to: string;
+      to?: string;
 
       /** If option is visible at all */
       isVisible?: MathExpressionString;
