@@ -2,7 +2,7 @@ import { Scene } from '../shared/types';
 import { StringObject } from './type-shorthand';
 import { useEffect, useState } from 'react';
 import { validateScene } from '../shared/validateScene';
-import { builtInScenes } from './built-in-scenes';
+import { builtInScenes, create404Scene, createErrorScene } from './built-in-scenes';
 
 const sceneCache: StringObject<Scene> = { ...builtInScenes };
 const requests: Set<string> = new Set();

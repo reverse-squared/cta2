@@ -9,6 +9,7 @@ import { Scene } from '../shared/types';
 import { validateScene } from '../shared/validateScene';
 
 import schema from '../../scene.schema.json';
+import { createErrorScene } from './built-in-scenes';
 
 export interface SceneEditorProps {
   state: GameState;

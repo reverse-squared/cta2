@@ -7,6 +7,7 @@ import { Scene } from '../shared/types';
 import env from '../shared/env';
 import { createScene } from '../server/scene';
 import { createRequestInDb, SceneRequest, deleteRequest, getAllRequests } from './requests';
+import { runDb, ctaDb } from '../server/database';
 
 const EMBED_COLOR = 0x64ed98;
 
@@ -95,6 +96,30 @@ function getDiscordEmbed(
   };
 }
 
+async function deleteRequetsOfLikeId(id: string) {
+  const requestsToRemove = await runDb(
+    ctaDb()
+      .table('requests')
+      .getAll(id, { index: 'id' })
+      .count()
+  );
+
+  for (let i = 0; i < requestsToRemove; i++) {
+    // Yeet the message.
+    const scene = await runDb(
+      ctaDb()
+        .table('requests')
+        .getAll(id, { index: 'id' })
+        .nth(0)
+    );
+    const message = await votingChannel.fetchMessage(scene.discordMessageId);
+
+    message.delete();
+
+    deleteRequest(scene.uuid);
+  }
+}
+
 async function watchForVoting(request: SceneRequest) {
   const message = await votingChannel.fetchMessage(request.discordMessageId);
   if (!message) {
@@ -135,6 +160,7 @@ async function watchForVoting(request: SceneRequest) {
 
     message.delete();
     deleteRequest(request.uuid);
+    deleteRequetsOfLikeId(request.id);
   });
 
   setTimeout(async () => {
@@ -167,6 +193,8 @@ async function watchForVoting(request: SceneRequest) {
         ),
       });
     }
+
+    deleteRequetsOfLikeId(request.id);
   }, request.ends - Date.now());
 }
 

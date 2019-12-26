@@ -36,7 +36,7 @@ export async function connectToDatabase() {
   }
 
   await createTable('scenes', {}, ['type']);
-  await createTable('suggestion', { primary_key: 'uuid' }, ['id']);
+  await createTable('requests', { primary_key: 'uuid' }, ['id']);
 }
 
 export function ctaDb() {
