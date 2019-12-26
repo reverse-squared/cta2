@@ -39,7 +39,7 @@ function resetGameState(this: GameState, startingScene: string = 'built-in/start
 
 export function createGameState(startingScene: string): GameState {
   const state: GameState = {
-    title: 'Community Text Adventure 2',
+    title: 'Community Text Adventure',
     scene: startingScene,
     prevScene: '@null',
     visitedScenes: [],

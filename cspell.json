@@ -9,6 +9,7 @@
     "downvotes",
     "mkdirs",
     "mkdirp",
-    "veditor"
+    "veditor",
+    "parcells"
   ]
 }

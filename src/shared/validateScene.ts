@@ -35,14 +35,8 @@ export function validateOption(x: unknown, name = 'option'): Option {
   if (!objectHasProperty(x, 'label')) {
     throw new ValidationError(name + '.label is missing".');
   }
-  if (!objectHasProperty(x, 'to')) {
-    throw new ValidationError(name + '.to is missing".');
-  }
   if (typeof x.label !== 'string') {
     throw new ValidationError(name + '.label is not type `string`".');
-  }
-  if (typeof x.to !== 'string') {
-    throw new ValidationError(name + '.to is not type `string`".');
   }
 
   if (objectHasProperty(x, 'isVisible') && typeof x.isVisible !== 'string') {
@@ -53,6 +47,9 @@ export function validateOption(x: unknown, name = 'option'): Option {
   }
   if (objectHasProperty(x, 'onActivate') && typeof x.onActivate !== 'string') {
     throw new ValidationError(name + '.onActivate is not type `string|undefined`');
+  }
+  if (objectHasProperty(x, 'to') && typeof x.to !== 'string') {
+    throw new ValidationError(name + '.to is not type `string|undefined`');
   }
 
   return x as Option;
