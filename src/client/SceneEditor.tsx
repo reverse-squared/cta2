@@ -209,28 +209,35 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
   }
 
   return (
-    <>
-      <p>note: the visual editor is a work in progress in beta.</p>
+    <div className='veditor'>
+      <p className='veditor-warning'>note: the visual editor is a work in progress in beta.</p>
 
       <div>
-        <label htmlFor='is_ending'>
+        <label className='checkbox' htmlFor='is_ending'>
           <input
             id='is_ending'
             type='checkbox'
             checked={scene.type === 'ending'}
             onChange={onTypeUpdate}
           />
-          Is Ending Scene.
+          <span className='display' />
+          <span className='label'>Is Ending Scene.</span>
         </label>
       </div>
 
+      <h2>Scene Passage</h2>
       <div>
         <textarea value={scene.passage} onChange={onPassageUpdate} rows={4} cols={50} />
       </div>
+      <p className='helper-text'>
+        A small paragraph or two about what's happening in the story in this scene. Displayed at the
+        top of the screen.
+      </p>
 
       {scene.type === 'scene' ? (
         <>
-          <h2>[options]</h2>
+          <h2>Options</h2>
+          <p className='helper-text'>The list of links below the Passage</p>
           {scene.options.map((option, index) => {
             return (
               <div>
@@ -257,10 +264,14 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
           <h2>[ending description]</h2>
         </>
       )}
-      <h2>[css]</h2>
+      <h2>Custom CSS</h2>
+      <p className='helper-text'>
+        Add custom styling to this scene with CSS. See the{' '}
+        <a href='/todo_docs_css'>documentation</a> on how to select elements from the scene.
+      </p>
       <textarea value={scene.css} onChange={handleCssChange} rows={7} cols={50} />
       <h2>[source]</h2>
-    </>
+    </div>
   );
 }
 

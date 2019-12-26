@@ -8,6 +8,7 @@
     "upvotes",
     "downvotes",
     "mkdirs",
-    "mkdirp"
+    "mkdirp",
+    "veditor"
   ]
 }

@@ -6,13 +6,128 @@
   right: 0;
   border: 10px solid #191b1b;
   display: flex;
+  overflow: hidden;
 }
 .editor > * {
   flex: 0 0 50%;
 }
 .editorEditor {
-  overflow: hidden;
-  background-color: black;
+  background-color: #23302b;
 }
 .editorPreview {
+}
+
+.veditor-warning {
+  color: red;
+  font-size: 14px;
+  margin-bottom: 50px;
+}
+
+.veditor {
+  margin: auto;
+  max-width: 550px;
+  padding-left: 25px;
+  padding-right: 25px;
+}
+.veditor h2 {
+  font-weight: normal;
+  font-size: 24px;
+}
+.helper-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 0;
+}
+.veditor textarea {
+  width: 100%;
+  resize: none;
+}
+.veditor textarea,
+.veditor input,
+.veditor button {
+  background-color: #203f33;
+  border: 1px solid #203f33;
+  color: white;
+  padding: 4px;
+}
+.veditor textarea:focus,
+.veditor input:focus,
+.veditor button:focus {
+  border: 1px solid #64ed98;
+  outline: none;
+}
+
+.veditor button:hover {
+  background-color: #295242;
+  border: 1px solid #295242;
+}
+.veditor button:active {
+  background-color: #64ed98;
+  border: 1px solid #64ed98;
+}
+.veditor a {
+  color: #64ed98;
+}
+.veditor a:not(:hover) {
+  text-decoration: none;
+}
+
+.veditor .checkbox {
+  position: relative;
+}
+.veditor .checkbox input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+/* Create a custom checkbox */
+.veditor .checkbox .display {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 25px;
+  width: 25px;
+  background-color: #203f33;
+}
+
+/* On mouse-over, add a grey background color */
+.veditor .checkbox:hover input ~ .display {
+  background-color: #295242;
+}
+
+/* When the checkbox is checked, add a blue background */
+.veditor .checkbox input:checked ~ .display {
+  background-color: #64ed98;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.veditor .display:after {
+  content: '';
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.veditor .checkbox input:checked ~ .display:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.veditor .checkbox .display:after {
+  left: 9px;
+  top: 5px;
+  width: 5px;
+  height: 10px;
+  border: solid black;
+  border-width: 0 2px 2px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.veditor .checkbox .label {
+  padding-left: 36px;
 }
