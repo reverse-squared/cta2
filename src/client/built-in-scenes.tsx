@@ -74,18 +74,36 @@ export const builtInScenes: StringObject<Scene> = {
       },
       'separator',
       {
-        label: 'Play the Original Community Text Adventure.',
-        to: 'https://cta.davecode.me/',
+        label: 'Credits',
+        to: '/built-in/credits',
       },
       {
         label: 'Join the Discord Server',
         to: 'https://discord.gg/ABwjpk4',
       },
       {
+        label: 'Play the Original Community Text Adventure.',
+        to: 'https://cta.davecode.me/',
+      },
+      {
         label: 'Read the Documentation',
         to: 'https://reverse-squared.github.io/cta2/#/',
       },
     ],
+    source: null,
+  },
+  'built-in/credits': {
+    type: 'scene',
+    passage: '',
+    options: [
+      {
+        label: 'Back',
+        to: '@undo',
+      },
+    ],
+    onActivate: 'oldTitle=title;title="Credits"',
+    onDeactivate: 'title=oldTitle',
+    meta: 'credits',
     source: null,
   },
   'built-in/scene-editor': {

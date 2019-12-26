@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo, useState, useEffect, useDebugValue } from 'react';
 import clsx from 'clsx';
-import path from 'path';
 import { Source, Scene } from '../shared/types';
 import FancyText from './FancyText';
 import { AnchorClickEvent } from './type-shorthand';
@@ -8,6 +7,7 @@ import { useSceneData, deleteSceneFromCache } from './useSceneData';
 import { GameState, evalMath, goToScene } from './gameState';
 import './css/scene.css';
 import { SceneEditor } from './SceneEditor';
+import Credits from './Credits';
 
 export interface GameProps {
   state: GameState;
@@ -67,28 +67,27 @@ function Game({ state, editorPreview }: GameProps) {
     [scene]
   );
 
-  useEffect(() => {
-    if (!scene) {
-      return;
-    }
-    if (scene.type === 'scene') {
-      if (scene.onActivate) {
-        evalMath(state, scene.onActivate);
-      }
-      if (!state.visitedScenes.includes(state.scene) && scene.onFirstActivate) {
-        evalMath(state, scene.onFirstActivate);
-      }
-      return () => {
-        if (scene.onDeactivate) {
-          evalMath(state, scene.onDeactivate);
+  useMemo(() => {
+    if (scene) {
+      if (scene.type === 'scene') {
+        if (scene.onActivate) {
+          evalMath(state, scene.onActivate);
         }
-        if (!state.visitedScenes.includes(state.scene)) {
-          if (scene.onFirstDeactivate) {
-            evalMath(state, scene.onFirstDeactivate);
+        if (!state.visitedScenes.includes(state.scene) && scene.onFirstActivate) {
+          evalMath(state, scene.onFirstActivate);
+        }
+        return () => {
+          if (scene.onDeactivate) {
+            evalMath(state, scene.onDeactivate);
           }
-          state.visitedScenes.push(state.scene);
-        }
-      };
+          if (!state.visitedScenes.includes(state.scene)) {
+            if (scene.onFirstDeactivate) {
+              evalMath(state, scene.onFirstDeactivate);
+            }
+            state.visitedScenes.push(state.scene);
+          }
+        };
+      }
     }
   }, [scene]);
 
@@ -101,13 +100,14 @@ function Game({ state, editorPreview }: GameProps) {
 
   let justOutputtedSeparator = true;
 
-  const title = state.title || 'Community Text Adventure 2';
+  const title = state.title || 'Community Text Adventure';
   return (
     <div className='sceneWrap'>
       <div className={'scene'}>
         {title && <h1>{title}</h1>}
         {scene.css && <style>{scene.css}</style>}
         <FancyText state={state} text={scene.passage} />
+        {scene.meta === 'credits' && <Credits />}
         {scene.type === 'scene' ? (
           <>
             <ul>
