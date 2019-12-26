@@ -114,7 +114,28 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
   // handlers for stuff
   const onTypeUpdate = useCallback(
     (ev: InputChangeEvent) => {
-      scene.type = ev.currentTarget.checked ? 'ending' : 'scene';
+      scene.type = ev.currentTarget.checked ? 'scene' : 'ending';
+
+      if (scene.type === 'scene') {
+        delete scene.options;
+        delete scene.preloadScenes;
+        delete scene.onFirstActivate;
+        delete scene.onFirstDeactivate;
+        delete scene.onActivate;
+        delete scene.onDeactivate;
+      } else {
+        delete scene.title;
+        delete scene.description;
+      }
+
+      scene.type = scene.type === 'ending' ? 'scene' : 'ending';
+
+      if (scene.type === 'scene') {
+        scene.options = [];
+      } else {
+        scene.title = '';
+        scene.description = '';
+      }
 
       updateScene(scene);
     },
@@ -145,17 +166,35 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
     <>
       <p>note: the visual editor is a work in progress in beta.</p>
 
-      <label htmlFor='is_ending'>
-        <input
-          id='is_ending'
-          type='checkbox'
-          checked={scene.type === 'ending'}
-          onChange={onTypeUpdate}
-        />
-        Is Ending Scene.
-      </label>
+      <div>
+        <label htmlFor='is_ending'>
+          <input
+            id='is_ending'
+            type='checkbox'
+            checked={scene.type === 'ending'}
+            onChange={onTypeUpdate}
+          />
+          Is Ending Scene.
+        </label>
+      </div>
 
-      <textarea value={scene.passage} onChange={onPassageUpdate} />
+      <div>
+        <textarea value={scene.passage} onChange={onPassageUpdate} />
+      </div>
+
+      {scene.type === 'scene' ? (
+        <>
+          <h2>[options]</h2>
+          <h2>[the on* things]</h2>
+        </>
+      ) : (
+        <>
+          <h2>[ending title]</h2>
+          <h2>[ending description]</h2>
+        </>
+      )}
+      <h2>[css]</h2>
+      <h2>[source]</h2>
     </>
   );
 }
