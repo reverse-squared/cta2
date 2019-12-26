@@ -18,11 +18,14 @@ export interface GameProps {
 
 const listFormatter = new (Intl as any).ListFormat('en', { style: 'long', type: 'conjunction' });
 
-function formatSource(input: Source | Source[] | null): string {
+function formatSource(input: Source | Source[] | string | null): string {
   if (input === null) {
-    return 'No one';
+    return 'no one';
   }
   if (Array.isArray(input)) {
+    if (input.length === 0) {
+      return 'no one';
+    }
     return listFormatter.format(input.map((x) => formatSource(x)));
   } else {
     if (typeof input === 'string') {
@@ -164,7 +167,7 @@ function Game({ state, editorPreview }: GameProps) {
         {scene.source !== null && (
           <p className={'source'}>
             {scene.type === 'scene' ? 'Scene' : 'Ending'} Contributed from{' '}
-            {formatSource(scene.source)}
+            {formatSource(scene.source)}.
           </p>
         )}
       </div>

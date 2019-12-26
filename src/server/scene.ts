@@ -37,7 +37,7 @@ export async function getScene(id: string): Promise<Scene | null> {
   );
 
   if (response) {
-    return response as Scene;
+    return (response as any).scene as Scene;
   } else {
     return null;
   }
