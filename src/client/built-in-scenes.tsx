@@ -65,13 +65,13 @@ export const builtInScenes: StringObject<Scene> = {
       'Welcome to the Community Text Adventure: Season 2 Beta. This is the second installment of Community Text Adventure where you (yes, you the player) can suggest new paths, endings, and vote on others. Be sure to join our Discord server at [https://discord.gg/ABwjpk4](https://discord.gg/ABwjpk4) to be able to vote on new scenes.\n\nYour help today will ensure the speedy and smooth release of the game on December 30th, 2019. Any scenes created before that time will not be transferred over to the released game.',
     options: [
       {
-        label: 'Play the first Community Text Adventure.',
-        to: 'https://cta.davecode.me/',
-      },
-      {
-        label: 'Start Community Text Adventure: Season 2.',
+        label: 'Start Community Text Adventure: Season 2',
         to: '@null',
         onActivate: 'reset("cta2/start")',
+      },
+      {
+        label: 'Start Community Text Adventure: Season 1',
+        to: 'https://cta.davecode.me/',
       },
       'separator',
       {

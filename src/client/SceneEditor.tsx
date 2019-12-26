@@ -13,6 +13,7 @@ import { validateScene } from '../shared/validateScene';
 import { createErrorScene } from './built-in-scenes';
 import { modelUri } from './monaco-config';
 import { TextareaChangeEvent, InputChangeEvent } from './type-shorthand';
+import { SchemaError } from 'jsonschema';
 
 export interface SceneEditorProps {
   state: GameState;
@@ -293,6 +294,18 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
     scene.source = moveIndex(sources, index, index + 1);
     updateScene(scene);
   }
+  function handleEndingDescriptionUpdate(ev: TextareaChangeEvent) {
+    if (scene.type === 'ending') {
+      scene.description = ev.currentTarget.value;
+      updateScene(scene);
+    }
+  }
+  function handleEndingTitleChange(ev: React.ChangeEvent<HTMLInputElement>) {
+    if (scene.type === 'ending') {
+      scene.title = ev.currentTarget.value;
+      updateScene(scene);
+    }
+  }
 
   if (!scene) {
     return (
@@ -421,7 +434,14 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
         ) : (
           <>
             <h2>[ending title]</h2>
+            <input value={scene.title} onChange={handleEndingTitleChange} />
             <h2>[ending description]</h2>
+            <textarea
+              value={scene.description}
+              onChange={handleEndingDescriptionUpdate}
+              rows={4}
+              cols={50}
+            />
           </>
         )}
         <h2>Custom CSS</h2>
