@@ -38,7 +38,8 @@ function resetGameState(this: GameState, startingScene: string = 'built-in/start
 }
 
 export function createGameState(startingScene: string): GameState {
-  const state = {
+  const state: GameState = {
+    title: 'Community Text Adventure 2',
     scene: startingScene,
     prevScene: '@null',
     visitedScenes: [],
@@ -47,7 +48,7 @@ export function createGameState(startingScene: string): GameState {
     setEndingAsNotAchieved: setEndingAsNotAchieved,
     reset: resetGameState,
   };
-  state.reset = resetGameState.bind(state);
+  state.reset = state.reset.bind(state);
   return state;
 }
 
@@ -78,7 +79,6 @@ const atLinks: StringObject<(state: GameState) => void> = {
   '@reset': (state) => {
     resetGameState.bind(state)();
   },
-  '@scene_request': (state) => {},
   '@null': (state) => {},
 };
 
@@ -90,6 +90,8 @@ export function goToScene(state: GameState, link: string) {
       // todo: catch these on renderer
       // throw new Error(`at-link ${link} not valid.`);
     }
+  } else if (link.startsWith('http://') || link.startsWith('https://')) {
+    window.open(link);
   } else {
     state.prevScene = state.scene;
     state.scene = path.resolve('/' + path.dirname(state.scene), link).substr(1);

@@ -136,7 +136,7 @@ function Game({ state, editorPreview }: GameProps) {
                           onClick={handleOptionClick}
                           option-id={i}
                         >
-                          <FancyText state={state} text={option.label} />
+                          <FancyText inline disableLinks state={state} text={option.label} />
                         </a>
                       </li>
                     );
@@ -150,7 +150,7 @@ function Game({ state, editorPreview }: GameProps) {
             {/* <p>You've found a new ending!</p> */}
             <div className={'ending'}>
               <div className={'endingTitle'}>
-                <FancyText state={state} text={scene.title} />
+                <FancyText inline disableLinks state={state} text={scene.title} />
               </div>
               <div className={'endingDescription'}>
                 <FancyText state={state} text={scene.description} />

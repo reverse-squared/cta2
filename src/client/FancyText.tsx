@@ -15,12 +15,24 @@ interface FTMRules {
   italic?: boolean;
   bold?: boolean;
   strike?: boolean;
+  underline?: boolean;
   code?: boolean;
   blockCode?: boolean;
 }
 interface FTMPart {
   text: string;
   styles?: (keyof FTMRules)[];
+}
+
+function mapFTMPart(part: FTMPart, index: number) {
+  return (
+    <span
+      key={index}
+      className={part.styles ? part.styles.map((x) => 'ftm-' + x).join(' ') : undefined}
+    >
+      {part.text}
+    </span>
+  );
 }
 
 function FancyText({ text, state, inline, disableLinks }: FancyTextProps) {
@@ -84,7 +96,7 @@ function FancyText({ text, state, inline, disableLinks }: FancyTextProps) {
       rules.italic = !rules.italic;
     }
     // strike
-    if (
+    else if (
       !rules.code &&
       !rules.blockCode &&
       text[i] === '~' &&
@@ -93,6 +105,18 @@ function FancyText({ text, state, inline, disableLinks }: FancyTextProps) {
     ) {
       endPart();
       rules.strike = !rules.strike;
+      i++;
+    }
+    // underline
+    else if (
+      !rules.code &&
+      !rules.blockCode &&
+      text[i] === '_' &&
+      text[i + 1] === '_' &&
+      text[i - 1] !== '\\'
+    ) {
+      endPart();
+      rules.underline = !rules.underline;
       i++;
     }
     // bold
@@ -132,7 +156,7 @@ function FancyText({ text, state, inline, disableLinks }: FancyTextProps) {
       i++;
     }
     // paragraphs
-    else if (text[i] === '\n' && text[i + 1] === '\n') {
+    else if (!inline && text[i] === '\n' && text[i + 1] === '\n') {
       endPart();
       paragraphs.push([]);
       i++;
@@ -143,26 +167,13 @@ function FancyText({ text, state, inline, disableLinks }: FancyTextProps) {
 
   endPart();
 
-  console.log(`FTM DEBUG\n{${text}}`);
-
   return (
     <>
-      {paragraphs.map((parts, j) => {
-        return (
-          <p key={j}>
-            {parts.map((part, i) => {
-              return (
-                <span
-                  key={i}
-                  className={part.styles ? part.styles.map((x) => 'ftm-' + x).join(' ') : undefined}
-                >
-                  {part.text}
-                </span>
-              );
-            })}
-          </p>
-        );
-      })}
+      {inline
+        ? paragraphs[0].map(mapFTMPart)
+        : paragraphs.map((parts, j) => {
+            return <p key={j}>{parts.map(mapFTMPart)}</p>;
+          })}
     </>
   );
 }

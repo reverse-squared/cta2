@@ -2,6 +2,16 @@ import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 import schema from '../../scene.schema.json';
 
+monaco.editor.defineTheme('cta', {
+  base: 'vs-dark',
+  inherit: true,
+  rules: [{ background: '#191b1b', token: '#ffffff' }],
+  colors: {
+    'editor.background': '#23302b',
+    'editorIndentGuide.background': '#384f48',
+  },
+});
+
 export const modelUri = monaco.Uri.parse(
   'a://b/' +
     Math.random()
