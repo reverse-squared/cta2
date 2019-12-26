@@ -22,7 +22,7 @@ export function createErrorScene(id: string, error: any): Scene {
       },
     ],
     css: 'body{background:#232020}',
-    source: [],
+    source: null,
     meta: 'error',
   };
 }
@@ -53,7 +53,7 @@ export function create404Scene(id: string): Scene {
       },
     ],
     css: 'body{background:#232020}',
-    source: [],
+    source: null,
     meta: '404',
   };
 }
@@ -74,7 +74,7 @@ export const builtInScenes: StringObject<Scene> = {
         onActivate: 'sceneEditorId="beta/editor-demo"',
       },
     ],
-    source: [],
+    source: null,
   },
   'built-in/scene-editor': {
     type: 'scene',
@@ -82,6 +82,6 @@ export const builtInScenes: StringObject<Scene> = {
       "This is the Scene Editor. If this text is showing and the scene editor isn't, that's a problem.",
     options: [],
     meta: 'scene-editor',
-    source: [],
+    source: null,
   },
 };
