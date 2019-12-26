@@ -5,7 +5,7 @@ import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 import './css/editor.css';
 import Game from './Game';
-import { Scene } from '../shared/types';
+import { Scene, Source } from '../shared/types';
 import { validateScene } from '../shared/validateScene';
 
 import schema from '../../scene.schema.json';
@@ -43,7 +43,7 @@ const blankScene = JSON.stringify(
       },
     ],
     onFirstActivate: 'isPennyOnGround = true',
-    source: 'yourself',
+    source: [{ name: 'yourself', desc: '' }],
   },
   null,
   2
@@ -176,6 +176,10 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
   }
   function handleDeleteOption(index: number) {
     if (scene.type === 'scene') {
+      if (scene.options.length === 1) {
+        return;
+      }
+
       scene.options.splice(index, 1);
 
       updateScene(scene);
@@ -227,6 +231,30 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
       updateScene(scene);
     }
   }
+  function handleAddSource() {
+    scene.source.push({
+      name: '',
+      desc: '',
+    });
+    updateScene(scene);
+  }
+  function handleSourceNameChange(index: number, ev: React.ChangeEvent<HTMLInputElement>) {
+    scene.source[index].name = ev.currentTarget.value;
+    updateScene(scene);
+  }
+  function handleSourceDescriptionChange(index: number, ev: React.ChangeEvent<HTMLInputElement>) {
+    scene.source[index].desc = ev.currentTarget.value;
+    updateScene(scene);
+  }
+  function handleRemoveSource(index: number) {
+    if (scene.source.length === 1) {
+      return;
+    }
+
+    scene.source.splice(index, 1);
+
+    updateScene(scene);
+  }
 
   return (
     <>
@@ -264,7 +292,12 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
                   value={option === 'separator' ? '' : option.to}
                   onChange={(event) => handleOptionToChange(index, event)}
                 />
-                <button onClick={() => handleDeleteOption(index)}>Delete</button>
+                <button
+                  onClick={() => handleDeleteOption(index)}
+                  disabled={scene.type === 'scene' && scene.options.length === 1}
+                >
+                  Delete
+                </button>
               </div>
             );
           })}
@@ -303,6 +336,26 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
       <h2>[css]</h2>
       <textarea value={scene.css} onChange={handleCssChange} rows={7} cols={50} />
       <h2>[source]</h2>
+      {scene.source.map((source: Source, index: number) => {
+        return (
+          <div>
+            <input
+              value={source.name}
+              onChange={(event) => handleSourceNameChange(index, event)}
+              placeholder='Name'
+            />
+            <input
+              value={source.desc}
+              onChange={(event) => handleSourceDescriptionChange(index, event)}
+              placeholder='Description (Optional)'
+            />
+            <button onClick={() => handleRemoveSource(index)} disabled={scene.source.length === 1}>
+              Delete
+            </button>
+          </div>
+        );
+      })}
+      <button onClick={handleAddSource}>Add Another Source</button>
     </>
   );
 }
