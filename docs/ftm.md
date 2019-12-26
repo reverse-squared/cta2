@@ -4,10 +4,10 @@
   - [Fancy Text Maker (FTM)](#fancy-text-maker-ftm)
     - [Basic Formatting](#basic-formatting)
     - [Built-in Variables](#built-in-variables)
-    - [Expressions](#expressions)
     - [Using CSS in a Scene](#using-css-in-a-scene)
     - [Using Custom Variables](#using-custom-variables)
     - [Using Custom Components](#using-custom-components)
+  - [Expressions](#expressions)
 
 ## Fancy Text Maker (FTM)
 
@@ -20,7 +20,11 @@ Basic formatting includes bolding, italicizing, underlining, and encoding things
 - <u>Underlining</u>. Surround any text with **two underscores**. (\_\_)
 - `Encoding`: Surround any text with **a back-tic**. (`)
 - [Links](https://www.youtube.com/watch?v=dQw4w9WgXcQ). \[Link Text\]\(URL\)
-- You can insert **new lines** with **\n**.
+- You can insert **new paragraphs** with **\n**.
+
+```
+Code blocks are possible by placing \`\`\` above and below your code block.
+```
 
 ### Built-in Variables
 
@@ -30,10 +34,10 @@ You can reference variables in your scenes using `${VARIABLE}`, where `VARIABLE`
 - `prevScene`: The previous scene.
 - `visitedScenes`: An array of scenes that you have visited already.
 
-### Expressions
-
 ### Using CSS in a Scene
 
 ### Using Custom Variables
 
 ### Using Custom Components
+
+## Expressions

@@ -67,7 +67,6 @@ export const builtInScenes: StringObject<Scene> = {
       {
         label: 'Play the first Community Text Adventure.',
         to: 'https://cta.davecode.me/',
-        onActivate: 'reset("cta2/start")',
       },
       {
         label: 'Start Community Text Adventure: Season 2.',
