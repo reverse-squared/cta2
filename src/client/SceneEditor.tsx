@@ -164,6 +164,50 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
     );
   }
 
+  function handleAddAnotherOption() {
+    if (scene.type === 'scene') {
+      scene.options.push({
+        label: '',
+        to: '',
+      });
+    }
+
+    updateScene(scene);
+  }
+  function handleDeleteOption(index: number) {
+    if (scene.type === 'scene') {
+      scene.options.splice(index, 1);
+
+      updateScene(scene);
+    }
+  }
+  function handleOptionLabelChange(index: number, ev: React.ChangeEvent<HTMLInputElement>) {
+    if (scene.type === 'scene') {
+      let sceneOptions = scene.options[index];
+      if (sceneOptions !== 'separator') {
+        sceneOptions.label = ev.currentTarget.value;
+      }
+      scene.options[index] = sceneOptions;
+
+      updateScene(scene);
+    }
+  }
+  function handleOptionToChange(index: number, ev: React.ChangeEvent<HTMLInputElement>) {
+    if (scene.type === 'scene') {
+      let sceneOptions = scene.options[index];
+      if (sceneOptions !== 'separator') {
+        sceneOptions.to = ev.currentTarget.value;
+      }
+      scene.options[index] = sceneOptions;
+
+      updateScene(scene);
+    }
+  }
+  function handleCssChange(ev: TextareaChangeEvent) {
+    scene.css = ev.currentTarget.value;
+    updateScene(scene);
+  }
+
   return (
     <>
       <p>note: the visual editor is a work in progress in beta.</p>
@@ -181,12 +225,30 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
       </div>
 
       <div>
-        <textarea value={scene.passage} onChange={onPassageUpdate} />
+        <textarea value={scene.passage} onChange={onPassageUpdate} rows={4} cols={50} />
       </div>
 
       {scene.type === 'scene' ? (
         <>
           <h2>[options]</h2>
+          {scene.options.map((option, index) => {
+            return (
+              <div>
+                <input
+                  placeholder='Label'
+                  value={option === 'separator' ? '' : option.label}
+                  onChange={(event) => handleOptionLabelChange(index, event)}
+                />
+                <input
+                  placeholder='To'
+                  value={option === 'separator' ? '' : option.to}
+                  onChange={(event) => handleOptionToChange(index, event)}
+                />
+                <button onClick={() => handleDeleteOption(index)}>Delete</button>
+              </div>
+            );
+          })}
+          <button onClick={handleAddAnotherOption}>Add Another Option</button>
           <h2>[the on* things]</h2>
         </>
       ) : (
@@ -196,6 +258,7 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
         </>
       )}
       <h2>[css]</h2>
+      <textarea value={scene.css} onChange={handleCssChange} rows={7} cols={50} />
       <h2>[source]</h2>
     </>
   );
