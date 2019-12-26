@@ -207,6 +207,26 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
     scene.css = ev.currentTarget.value;
     updateScene(scene);
   }
+  function handleOnActivateChange(ev: TextareaChangeEvent) {
+    scene.onActivate = ev.currentTarget.value;
+    updateScene(scene);
+  }
+  function handleOnFirstActivateChange(ev: TextareaChangeEvent) {
+    scene.onFirstActivate = ev.currentTarget.value;
+    updateScene(scene);
+  }
+  function handleOnDeactivateChange(ev: TextareaChangeEvent) {
+    if (scene.type === 'scene') {
+      scene.onDeactivate = ev.currentTarget.value;
+      updateScene(scene);
+    }
+  }
+  function handleOnFirstDeactivateChange(ev: TextareaChangeEvent) {
+    if (scene.type === 'scene') {
+      scene.onFirstDeactivate = ev.currentTarget.value;
+      updateScene(scene);
+    }
+  }
 
   return (
     <>
@@ -250,6 +270,29 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
           })}
           <button onClick={handleAddAnotherOption}>Add Another Option</button>
           <h2>[the on* things]</h2>
+          <p>onActivate</p>
+          <textarea rows={4} cols={50} value={scene.onActivate} onChange={handleOnActivateChange} />
+          <p>onFirstActivate</p>
+          <textarea
+            rows={4}
+            cols={50}
+            value={scene.onFirstActivate}
+            onChange={handleOnFirstActivateChange}
+          />
+          <p>onDeactivate</p>
+          <textarea
+            rows={4}
+            cols={50}
+            value={scene.onDeactivate}
+            onChange={handleOnDeactivateChange}
+          />
+          <p>onFirstDeactivate</p>
+          <textarea
+            rows={4}
+            cols={50}
+            value={scene.onFirstDeactivate}
+            onChange={handleOnFirstDeactivateChange}
+          />
         </>
       ) : (
         <>
