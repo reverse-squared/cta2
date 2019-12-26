@@ -99,10 +99,11 @@ function Game({ state, editorPreview }: GameProps) {
 
   let justOutputtedSeparator = true;
 
+  const title = state.title || 'Community Text Adventure 2';
   return (
     <div className='sceneWrap'>
       <div className={'scene'}>
-        <h1>live editing demo</h1>
+        {title && <h1>{title}</h1>}
         {scene.css && <style>{scene.css}</style>}
         <FancyText state={state} text={scene.passage} />
         {scene.type === 'scene' ? (

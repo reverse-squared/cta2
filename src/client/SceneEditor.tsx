@@ -100,10 +100,6 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
     scene = null as any;
   }
 
-  while (scene.type === 'scene' && scene && scene.options[0] === 'separator') {
-    scene.options.shift();
-  }
-
   const updateScene = useCallback(
     (scene: Scene) => {
       onCodeChange(JSON.stringify(scene, null, 2));

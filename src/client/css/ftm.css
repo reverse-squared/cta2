@@ -1,0 +1,20 @@
+.ftm-italic {
+  font-style: italic;
+}
+.ftm-bold {
+  font-weight: bold;
+}
+.ftm-code {
+  color: rgb(168, 197, 169);
+  font-family: 'Roboto Mono';
+  white-space: pre-wrap;
+}
+.ftm-blockCode {
+  display: block;
+  white-space: pre-wrap;
+  color: rgb(168, 197, 169);
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+  padding: 4px;
+  font-family: 'Roboto Mono';
+}

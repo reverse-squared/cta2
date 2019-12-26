@@ -23,6 +23,8 @@ export interface GameState {
   setEndingAsNotAchieved: (id: string) => void;
   /* Reset's the game's state, with an optional starting scene. Used on the main menu screen. */
   reset: (id?: string) => void;
+  /* The title shown at the top of the page. */
+  title: string;
 }
 
 function resetGameState(this: GameState, startingScene: string = 'built-in/start') {
