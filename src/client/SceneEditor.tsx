@@ -8,11 +8,21 @@ import './css/editor.css';
 import Game from './Game';
 import { Scene } from '../shared/types';
 import { validateScene } from '../shared/validateScene';
-
-import schema from '../../scene.schema.json';
+import { modelUri } from './monaco-config';
+import {
+  StringObject,
+  TextareaChangeEvent,
+  SelectChangeEvent,
+  InputChangeEvent,
+} from './type-shorthand';
 
 export interface SceneEditorProps {
   state: GameState;
+}
+
+export interface SceneEditorEditorProps {
+  code: string;
+  onCodeChange: (code: string) => void;
 }
 
 const blankScene = JSON.stringify(
@@ -37,33 +47,22 @@ const blankScene = JSON.stringify(
   2
 );
 
-const modelUri = monaco.Uri.parse('a://b/foo.json'); // a made up unique URI for our model
+const model = monaco.editor.createModel(blankScene, 'json', modelUri);
 
-monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-  validate: true,
-  schemas: [
-    {
-      uri: `${location.protocol}//${location.host}/scene.schema.json`, // id of the first schema
-      fileMatch: [modelUri.toString()], // associate with our model
-      schema: schema,
-    },
-  ],
-});
-
-export function SceneEditor({ state }: SceneEditorProps) {
-  const sceneEditorId = state['sceneEditorId'] || 'built-in/preview';
-
+function RawEditor({ code, onCodeChange }: SceneEditorEditorProps) {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
-  const [code, setCode] = useState(blankScene);
 
   const editorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       editorRef.current = editor;
 
-      const model = monaco.editor.createModel(blankScene, 'json', modelUri);
+      console.log('mounted');
+
+      model.setValue(code);
+
       editor.setModel(model);
     },
-    [editorRef]
+    [code, editorRef]
   );
 
   useEffect(() => {
@@ -80,6 +79,105 @@ export function SceneEditor({ state }: SceneEditorProps) {
     }
   }, [editorRef.current]);
 
+  return (
+    <MonacoEditor
+      language='json'
+      theme='vs-dark'
+      options={{}}
+      onChange={(x) => onCodeChange(x)}
+      editorDidMount={editorDidMount}
+    />
+  );
+}
+
+function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
+  const reset = useCallback(() => {
+    onCodeChange(blankScene);
+  }, []);
+
+  let scene: Scene;
+  let error: any;
+  try {
+    scene = validateScene(JSON.parse(code));
+  } catch (e) {
+    error = e;
+    scene = null as any;
+  }
+
+  const updateScene = useCallback(
+    (scene: Scene) => {
+      onCodeChange(JSON.stringify(scene, null, 2));
+    },
+    [onCodeChange]
+  );
+
+  // handlers for stuff
+  const onTypeUpdate = useCallback(
+    (ev: InputChangeEvent) => {
+      scene.type = ev.currentTarget.checked ? 'ending' : 'scene';
+
+      updateScene(scene);
+    },
+    [scene, updateScene]
+  );
+  const onPassageUpdate = useCallback(
+    (ev: TextareaChangeEvent) => {
+      scene.passage = ev.currentTarget.value;
+
+      updateScene(scene);
+    },
+    [scene, updateScene]
+  );
+
+  if (!scene) {
+    return (
+      <div>
+        <h1>Error in Scene Formatting</h1>
+        <pre>{error.stack || error}</pre>
+        <a href='#' onClick={reset}>
+          Reset your scene (Discards information)
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <p>note: the visual editor is a work in progress in beta.</p>
+
+      <label htmlFor='is_ending'>
+        <input
+          id='is_ending'
+          type='checkbox'
+          checked={scene.type === 'ending'}
+          onChange={onTypeUpdate}
+        />
+        Is Ending Scene.
+      </label>
+
+      <textarea value={scene.passage} onChange={onPassageUpdate} />
+    </>
+  );
+}
+
+type EditorTypes = 'raw' | 'visual';
+
+const editors = {
+  raw: RawEditor,
+  visual: VisualEditor,
+};
+
+export function SceneEditor({ state }: SceneEditorProps) {
+  const sceneEditorId = state['sceneEditorId'] || 'built-in/preview';
+
+  const [editor, setEditor] = useState<EditorTypes>('visual');
+  const [code, setCode] = useState(blankScene);
+
+  const setEditorTo = {
+    visual: useCallback(() => setEditor('visual'), []),
+    raw: useCallback(() => setEditor('raw'), []),
+  };
+
   let previewedScene: Scene;
   try {
     previewedScene = validateScene(JSON.parse(code));
@@ -89,17 +187,16 @@ export function SceneEditor({ state }: SceneEditorProps) {
 
   const passedState = useMemo(() => createGameState(sceneEditorId), [code]);
 
+  const Editor = editors[editor];
+
   return (
     <div className='editor'>
       <div className='editorEditor'>
-        <MonacoEditor
-          language='json'
-          theme='vs-dark'
-          value={code}
-          options={{}}
-          onChange={setCode}
-          editorDidMount={editorDidMount}
-        />
+        <div>
+          <button onClick={setEditorTo.raw}>Raw Code</button>
+          <button onClick={setEditorTo.visual}>Visual Editor</button>
+        </div>
+        <Editor onCodeChange={setCode} code={code} />
       </div>
       <div className='editorPreview'>
         <Game
