@@ -21,16 +21,22 @@ export interface GameState {
   setEndingAsAchieved: (id: string) => void;
   /* Marks an ending as NOT achieved. */
   setEndingAsNotAchieved: (id: string) => void;
+  /* Reset's the game's state, with an optional starting scene. Used on the main menu screen. */
+  reset: (id?: string) => void;
 }
 
-let mainState = createGameState('built-in/start');
-
-function resetGameState(startingScene: string = 'built-in/start') {
-  mainState = createGameState(startingScene);
+function resetGameState(this: GameState, startingScene: string = 'built-in/start') {
+  const state = createGameState(startingScene || this.scene);
+  Object.keys(this).forEach((x) => {
+    delete this[x];
+  });
+  Object.keys(state).forEach((x) => {
+    this[x] = state[x];
+  });
 }
 
 export function createGameState(startingScene: string): GameState {
-  return {
+  const state = {
     scene: startingScene,
     prevScene: '@null',
     visitedScenes: [],
@@ -39,6 +45,8 @@ export function createGameState(startingScene: string): GameState {
     setEndingAsNotAchieved: setEndingAsNotAchieved,
     reset: resetGameState,
   };
+  state.reset = resetGameState.bind(state);
+  return state;
 }
 
 export function evalMath(state: GameState, input: string | string[]) {
@@ -65,7 +73,9 @@ const atLinks: StringObject<(state: GameState) => void> = {
     state.scene = state.prevScene;
     state.prevScene = '@null';
   },
-  '@reset': (state) => {},
+  '@reset': (state) => {
+    resetGameState.bind(state)();
+  },
   '@scene_request': (state) => {},
   '@null': (state) => {},
 };

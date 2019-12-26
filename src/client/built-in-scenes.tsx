@@ -66,7 +66,7 @@ export const builtInScenes: StringObject<Scene> = {
       {
         label: 'Start Community Text Adventure Season 2',
         to: '@null',
-        onActivate: 'resetGameState("cta2")',
+        onActivate: 'reset("cta2/start")',
       },
       {
         label: 'Scene Editor',
