@@ -1,93 +1,14 @@
-import React, { useState, Component, useRef, useCallback, useEffect, useMemo } from 'react';
-import { GameState, createGameState } from './gameState';
-import MonacoEditor from 'react-monaco-editor';
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import React, { useCallback } from 'react';
 import { moveIndex } from '@reverse/array';
-import clsx from 'clsx';
 
-import './css/editor.css';
-import Game from './Game';
-import { Scene, Source } from '../shared/types';
-import { validateScene } from '../shared/validateScene';
+import { validateScene } from '../../../../shared/validateScene';
 
-import { createErrorScene } from './built-in-scenes';
-import { modelUri } from './monaco-config';
-import { TextareaChangeEvent, InputChangeEvent } from './type-shorthand';
-import { SchemaError } from 'jsonschema';
+import { Scene, Source } from '../../../../shared/types';
 
-export interface SceneEditorProps {
-  state: GameState;
-}
+import { InputChangeEvent, TextareaChangeEvent } from '../../../type-shorthand';
+import { blankScene, SceneEditorEditorProps } from '../SceneEditor';
 
-export interface SceneEditorEditorProps {
-  code: string;
-  onCodeChange: (code: string) => void;
-}
-
-const blankScene = JSON.stringify(
-  {
-    type: 'scene',
-    passage: 'You stumble upon a penny when walking to work.',
-    options: [
-      {
-        label: 'Pick it up.',
-        to: 'pennyPickup',
-        isVisible: 'isPennyOnGround',
-      },
-      {
-        label: 'Leave it.',
-        to: 'work',
-      },
-    ],
-    onFirstActivate: 'isPennyOnGround = true',
-    source: [{ name: 'yourself', desc: '' }],
-  },
-  null,
-  2
-);
-
-const model = monaco.editor.createModel(blankScene, 'json', modelUri);
-
-function RawEditor({ code, onCodeChange }: SceneEditorEditorProps) {
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
-
-  const editorDidMount = useCallback(
-    (editor: monaco.editor.IStandaloneCodeEditor) => {
-      editorRef.current = editor;
-
-      console.log('mounted');
-
-      model.setValue(code);
-
-      editor.setModel(model);
-    },
-    [code, editorRef]
-  );
-
-  useEffect(() => {
-    function resizeHandler() {
-      if (editorRef.current !== undefined) {
-        editorRef.current.layout();
-      }
-    }
-    if (editorRef.current !== undefined) {
-      window.addEventListener('resize', resizeHandler);
-      return () => {
-        window.removeEventListener('resize', resizeHandler);
-      };
-    }
-  }, [editorRef.current]);
-
-  return (
-    <MonacoEditor
-      language='json'
-      theme='cta'
-      options={{}}
-      onChange={(x) => onCodeChange(x)}
-      editorDidMount={editorDidMount}
-    />
-  );
-}
+let mirror: Scene = null as any;
 
 function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
   const reset = useCallback(() => {
@@ -115,26 +36,32 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
     (ev: InputChangeEvent) => {
       scene.type = ev.currentTarget.checked ? 'scene' : 'ending';
 
-      if (scene.type === 'scene') {
-        delete scene.options;
-        delete scene.preloadScenes;
-        delete scene.onFirstActivate;
-        delete scene.onFirstDeactivate;
-        delete scene.onActivate;
-        delete scene.onDeactivate;
-      } else {
-        delete scene.title;
-        delete scene.description;
+      if (!mirror) {
+        mirror = { ...scene };
+
+        if (mirror.type === 'scene') {
+          delete mirror.options;
+          delete mirror.preloadScenes;
+          delete mirror.onFirstActivate;
+          delete mirror.onFirstDeactivate;
+          delete mirror.onActivate;
+          delete mirror.onDeactivate;
+        } else {
+          delete mirror.title;
+          delete mirror.description;
+        }
+
+        mirror.type = mirror.type === 'ending' ? 'scene' : 'ending';
+
+        if (mirror.type === 'scene') {
+          mirror.options = [];
+        } else {
+          mirror.title = '';
+          mirror.description = '';
+        }
       }
 
-      scene.type = scene.type === 'ending' ? 'scene' : 'ending';
-
-      if (scene.type === 'scene') {
-        scene.options = [];
-      } else {
-        scene.title = '';
-        scene.description = '';
-      }
+      [scene, mirror] = [mirror, scene];
 
       updateScene(scene);
     },
@@ -478,73 +405,4 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
   );
 }
 
-type EditorTypes = 'raw' | 'visual';
-
-const editors = {
-  raw: RawEditor,
-  visual: VisualEditor,
-};
-
-export function SceneEditor({ state }: SceneEditorProps) {
-  const sceneEditorId = state['sceneEditorId'] || 'built-in/preview';
-
-  const [editor, setEditor] = useState<EditorTypes>('visual');
-  const [code, setCode] = useState(blankScene);
-
-  const setEditorTo = {
-    visual: useCallback(() => setEditor('visual'), []),
-    raw: useCallback(() => setEditor('raw'), []),
-  };
-
-  let previewedScene: Scene;
-  try {
-    previewedScene = validateScene(JSON.parse(code));
-  } catch (error) {
-    previewedScene = createErrorScene(sceneEditorId, error);
-  }
-
-  const passedState = useMemo(() => createGameState(sceneEditorId), [code]);
-
-  const Editor = editors[editor];
-
-  return (
-    <div className='editor'>
-      <div className='editorEditor'>
-        <div className='editor-switch-container'>
-          <button
-            className={clsx('editor-switch-button', editor === 'raw' && 'current')}
-            onClick={setEditorTo.raw}
-          >
-            Raw Code
-          </button>
-          <button
-            className={clsx('editor-switch-button', editor === 'visual' && 'current')}
-            onClick={setEditorTo.visual}
-          >
-            Visual Editor
-          </button>
-        </div>
-        <div
-          style={{
-            position: 'absolute',
-            overflow: 'hidden',
-            top: '32px',
-            left: '0',
-            right: '0',
-            bottom: '0',
-          }}
-        >
-          <Editor onCodeChange={setCode} code={code} />
-        </div>
-      </div>
-      <div className='editorPreview'>
-        <Game
-          state={passedState}
-          editorPreview={{
-            scene: previewedScene,
-          }}
-        />
-      </div>
-    </div>
-  );
-}
+export default VisualEditor;

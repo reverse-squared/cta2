@@ -1,6 +1,6 @@
 import React from 'react';
-import { FancyTextMakerString } from '../shared/types';
-import { GameState, evalMath } from './gameState';
+import { FancyTextMakerString } from '../../shared/types';
+import { GameState, evalMath } from '../gameState';
 
 import './css/ftm.css';
 

@@ -1,12 +1,12 @@
 import React, { useCallback, useMemo, useState, useEffect, useDebugValue } from 'react';
 import clsx from 'clsx';
-import { Source, Scene } from '../shared/types';
+import { Source, Scene } from '../../shared/types';
 import FancyText from './FancyText';
-import { AnchorClickEvent } from './type-shorthand';
-import { useSceneData, deleteSceneFromCache } from './useSceneData';
-import { GameState, evalMath, goToScene } from './gameState';
+import { AnchorClickEvent } from '../type-shorthand';
+import { useSceneData, deleteSceneFromCache } from '../useSceneData';
+import { GameState, evalMath, goToScene } from '../gameState';
 import './css/scene.css';
-import { SceneEditor } from './SceneEditor';
+import { SceneEditor } from './SceneEditor/SceneEditor';
 import Credits from './Credits';
 
 export interface GameProps {
