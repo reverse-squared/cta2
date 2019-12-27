@@ -1,6 +1,6 @@
 import React from 'react';
 import { FancyTextMakerString } from '../shared/types';
-import { GameState, evalMath } from './gameState';
+import { GameState } from './gameState';
 
 import './css/ftm.css';
 
@@ -37,7 +37,7 @@ function mapFTMPart(part: FTMPart, index: number) {
 
 function FancyText({ text, state, inline, disableLinks }: FancyTextProps) {
   if (text.startsWith('=')) {
-    text = String(evalMath(state, text.substr(1)));
+    text = String(state.eval(text.substr(1)));
   }
   if (text.startsWith('\\=')) {
     text.substr(2);
@@ -45,7 +45,7 @@ function FancyText({ text, state, inline, disableLinks }: FancyTextProps) {
   text = text
     .replace(/\\?\${([^}]+)}/g, (string, code) => {
       if (string.startsWith('\\')) return string.substr(1);
-      return String(evalMath(state, code));
+      return String(state.eval(code));
     })
     .replace(/^\s+$/gm, '')
     .replace(/\n\n+/, '\n\n');

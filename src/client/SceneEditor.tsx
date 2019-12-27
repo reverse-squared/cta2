@@ -39,7 +39,7 @@ const blankScene = JSON.stringify(
       },
     ],
     onFirstActivate: 'isPennyOnGround = true',
-    source: [{ name: 'yourself', desc: '' }],
+    source: 'yourself',
   },
   null,
   2
@@ -148,13 +148,13 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
     [scene, updateScene]
   );
 
-  const sources: Source[] =
+  const sources: { name: string; desc?: string }[] =
     scene.source === null
       ? []
       : typeof scene.source === 'string'
       ? [{ name: scene.source }]
       : Array.isArray(scene.source)
-      ? scene.source
+      ? scene.source.map((source) => (typeof source === 'string' ? { name: source } : source))
       : [scene.source];
 
   function handleAddAnotherOption() {
@@ -431,7 +431,7 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
         </p>
         <textarea value={scene.css} onChange={handleCssChange} rows={7} cols={50} />
         <h2>[source]</h2>
-        {sources.map((source: Source, index: number) => {
+        {sources.map((source: { name: string; desc?: string }, index: number) => {
           return (
             <div>
               <input
@@ -466,6 +466,8 @@ const editors = {
 };
 
 export function SceneEditor({ state }: SceneEditorProps) {
+  const [, setRenderNumber] = useState(0);
+
   const sceneEditorId = state['sceneEditorId'] || 'built-in/preview';
 
   const [editor, setEditor] = useState<EditorTypes>('visual');
@@ -485,7 +487,19 @@ export function SceneEditor({ state }: SceneEditorProps) {
 
   const passedState = useMemo(() => createGameState(sceneEditorId), [code]);
 
+  useEffect(() => {
+    const rerender = () => setRenderNumber(Math.random());
+    state.__internal_eventListener.addListener(rerender);
+    return () => {
+      state.__internal_eventListener.removeListener(rerender);
+    };
+  }, [state]);
+
   const Editor = editors[editor];
+
+  const resetPreviewState = useCallback(() => {
+    passedState.reset(sceneEditorId);
+  }, [passedState, sceneEditorId]);
 
   return (
     <div className='editor'>
@@ -518,11 +532,18 @@ export function SceneEditor({ state }: SceneEditorProps) {
         </div>
       </div>
       <div className='editorPreview'>
+        <div className='preview-toolbar'>
+          <button onClick={resetPreviewState}>Reset</button>
+          <div style={{ fontSize: '16px' }}>
+            Current Scene: <code>{state.scene}</code>
+          </div>
+        </div>
         <Game
           state={passedState}
-          editorPreview={{
-            scene: previewedScene,
+          extraScenes={{
+            [sceneEditorId]: previewedScene,
           }}
+          isSceneEditorPreview
         />
       </div>
     </div>
