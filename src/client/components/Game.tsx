@@ -5,9 +5,10 @@ import FancyText from './FancyText';
 import { AnchorClickEvent, StringObject } from '../type-shorthand';
 import { useSceneData } from '../useSceneData';
 import { GameState } from '../gameState';
-import './css/scene.css';
+import '../css/scene.css';
 import Credits from './Credits';
-import SceneEditor from './SceneEditor/SceneEditor';
+import SceneEditor from './SceneEditor';
+import CTAInspector from './Inspector';
 
 export interface GameProps {
   state: GameState;
@@ -37,6 +38,7 @@ function formatSource(input: Source | Source[] | string | null): string {
 
 function Game({ state, extraScenes, isSceneEditorPreview }: GameProps) {
   const [, setRenderNumber] = useState(0);
+  const [inspector, setInspector] = useState(false);
 
   if (!state.visitedScenes) state.visitedScenes = [];
 
@@ -82,9 +84,14 @@ function Game({ state, extraScenes, isSceneEditorPreview }: GameProps) {
 
   let justOutputtedSeparator = true;
 
+  state.__internal_toggleInspector = useCallback(() => {
+    setInspector((x) => !x);
+  }, []);
+
   const title = state.title || 'Community Text Adventure';
   return (
     <div className='sceneWrap'>
+      {inspector && <CTAInspector state={state} />}
       <div className={'scene'}>
         {title && <h1>{title}</h1>}
         {scene.css && <style>{scene.css}</style>}

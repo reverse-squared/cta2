@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import MonacoEditor from 'react-monaco-editor';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
@@ -6,7 +6,8 @@ import { SceneEditorEditorProps } from './SceneEditor';
 import { modelUri } from './monaco-config';
 import { blankScene } from './blankScene';
 
-export const model = monaco.editor.createModel(blankScene, 'json', modelUri);
+const model =
+  monaco.editor.getModel(modelUri) || monaco.editor.createModel(blankScene, 'json', modelUri);
 
 function RawEditor({ code, onCodeChange }: SceneEditorEditorProps) {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
@@ -38,12 +39,26 @@ function RawEditor({ code, onCodeChange }: SceneEditorEditorProps) {
     }
   }, [editorRef.current]);
 
+  const [width, setWidth] = useState(window.innerWidth);
+  useEffect(() => {
+    function handler() {
+      setWidth(window.innerWidth);
+    }
+    window.addEventListener('resize', handler);
+    return () => {
+      window.removeEventListener('resize', handler);
+    };
+  }, []);
+
   return (
     <MonacoEditor
       language='json'
       theme='cta'
-      options={{}}
-      onChange={(x) => onCodeChange(x)}
+      options={{
+        wordWrap: 'wordWrapColumn',
+        wordWrapColumn: Math.floor(((width - 20) / 2 - 200) / 8.43),
+      }}
+      onChange={onCodeChange}
       editorDidMount={editorDidMount}
     />
   );

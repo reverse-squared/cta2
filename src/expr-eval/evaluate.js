@@ -86,7 +86,7 @@ export default function evaluate(tokens, expr, values) {
         args.unshift(resolveExpression(nstack.pop(), values));
       }
       f = nstack.pop();
-      if (f.apply && f.call) {
+      if (f && f.apply && f.call) {
         nstack.push(f.apply(undefined, args));
       } else {
         throw new Error(f + ' is not a function');

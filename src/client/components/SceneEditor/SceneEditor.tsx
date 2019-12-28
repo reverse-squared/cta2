@@ -1,14 +1,14 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import clsx from 'clsx';
 import { validateScene } from '../../../shared/validateScene';
-import { createErrorScene } from '../../built-in-scenes';
+import { createErrorScene, builtInScenes } from '../../built-in-scenes';
 import Game from '../Game';
 import RawEditor from './RawEditor';
 import VisualEditor from './VisualEditor';
 import { Scene } from '../../../shared/types';
 import { GameState, createGameState } from '../../gameState';
 import { blankScene } from './blankScene';
-import '../css/editor.css';
+import '../../css/editor.css';
 
 export interface SceneEditorProps {
   state: GameState;
@@ -27,6 +27,8 @@ const editors = {
 };
 
 function SceneEditor({ state }: SceneEditorProps) {
+  const [, setRenderNumber] = useState(0);
+
   const sceneEditorId = state['sceneEditorId'] || 'built-in/preview';
 
   const [editor, setEditor] = useState<EditorTypes>('visual');
@@ -47,6 +49,42 @@ function SceneEditor({ state }: SceneEditorProps) {
   const passedState = useMemo(() => createGameState(sceneEditorId), [code]);
 
   const Editor = editors[editor];
+
+  const [width, setWidth] = useState(window.innerWidth);
+  useEffect(() => {
+    function handler() {
+      setWidth(window.innerWidth);
+    }
+    window.addEventListener('resize', handler);
+    return () => {
+      window.removeEventListener('resize', handler);
+    };
+  }, []);
+
+  const resetPreviewState = useCallback(() => {
+    passedState.reset(sceneEditorId);
+  }, [passedState]);
+
+  useEffect(() => {
+    const rerender = () => setRenderNumber(Math.random());
+    passedState.__internal_eventListener.addListener(rerender);
+    return () => {
+      passedState.__internal_eventListener.removeListener(rerender);
+    };
+  }, [passedState]);
+
+  if (width < 1145) {
+    return (
+      <>
+        <Game
+          state={state}
+          extraScenes={{
+            'built-in/scene-editor': builtInScenes['built-in/scene-editor-too-small'],
+          }}
+        />
+      </>
+    );
+  }
 
   return (
     <div className='editor'>
@@ -79,6 +117,12 @@ function SceneEditor({ state }: SceneEditorProps) {
         </div>
       </div>
       <div className='editorPreview'>
+        <div className='preview-toolbar'>
+          <button onClick={resetPreviewState}>Reset</button>
+          <div style={{ fontSize: '16px' }}>
+            Current Scene: <code>{passedState.scene}</code>
+          </div>
+        </div>
         <Game
           state={passedState}
           extraScenes={{

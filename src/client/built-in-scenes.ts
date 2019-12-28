@@ -73,9 +73,14 @@ export const builtInScenes: StringObject<Scene> = {
         label: 'Play CTA: Season 2',
         onActivate: 'reset("cta2/start")',
       },
+      'separator',
       {
-        label: 'Open the Scene Editor',
+        label: '**DEBUG**: Scene Editor',
         onActivate: `reset("/built-in/scene-editor");sceneEditorId="built-in/demo"`,
+      },
+      {
+        label: '**DEBUG**: Inspector',
+        onActivate: '__internal_toggleInspector()',
       },
       'separator',
       {
@@ -132,6 +137,20 @@ export const builtInScenes: StringObject<Scene> = {
       },
       {
         label: 'Return to the Main Menu',
+        to: '@reset',
+      },
+    ],
+    source: null,
+  },
+  'built-in/first-time-introduction': {
+    type: 'scene',
+    passage: `Community Text Adventure is a game about endings. Good and Bad, there are infinite
+              possibilities of what you can do here.
+
+              You've got a long way to go, with \${__internal_endingCount} endings in the game.`,
+    options: [
+      {
+        label: '*Time to collect some endings!*',
         to: '@reset',
       },
     ],

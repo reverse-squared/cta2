@@ -247,7 +247,10 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
   return (
     <div className='veditor-scroll'>
       <div className='veditor'>
-        <p className='veditor-warning'>note: the visual editor is a work in progress in beta.</p>
+        <p className='veditor-warning'>
+          [NOTICE]: the visual editor is a work in progress in beta. It is also missing some
+          features such as adding custom logic. For that you can use the Raw Editor.
+        </p>
 
         <div>
           <label className='checkbox' htmlFor='is_ending'>
@@ -334,47 +337,6 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
               </button>
               <button onClick={handleAddAnotherSeparator}>Add Separator</button>
             </div>
-            <h2>Event Handlers</h2>
-            <p>onActivate</p>
-            <textarea
-              rows={(() => {
-                const x = (scene.onActivate || '').match(/.{61}|.{0,61}(\n|$)/g);
-                return (x || []).length;
-              })()}
-              cols={50}
-              value={scene.onActivate}
-              onChange={handleOnActivateChange}
-            />
-            <p>onFirstActivate</p>
-            <textarea
-              rows={(() => {
-                const x = (scene.onFirstActivate || '').match(/.{61}|.{0,61}(\n|$)/g);
-                return (x || []).length;
-              })()}
-              cols={50}
-              value={scene.onFirstActivate}
-              onChange={handleOnFirstActivateChange}
-            />
-            <p>onDeactivate</p>
-            <textarea
-              rows={(() => {
-                const x = (scene.onDeactivate || '').match(/.{61}|.{0,61}(\n|$)/g);
-                return (x || []).length;
-              })()}
-              cols={50}
-              value={scene.onDeactivate}
-              onChange={handleOnDeactivateChange}
-            />
-            <p>onFirstDeactivate</p>
-            <textarea
-              rows={(() => {
-                const x = (scene.onFirstDeactivate || '').match(/.{61}|.{0,61}(\n|$)/g);
-                return (x || []).length;
-              })()}
-              cols={50}
-              value={scene.onFirstDeactivate}
-              onChange={handleOnFirstDeactivateChange}
-            />
           </>
         ) : (
           <>

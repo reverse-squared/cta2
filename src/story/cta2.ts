@@ -8,7 +8,7 @@ const cta2BuiltInScenes: StringObject<Scene> = {
   'cta2/plane_waiting': {
     type: 'scene',
     passage: `You're boarding the Community Airlines on your way to Europe, it's going to be a great
-    flight. You got another \${startingFlightTimeLeft} hour\${if(startingFlightTimeLeft==1,"","s")} left on your flight, what shall you do
+    flight. You got another \${startingFlightTimeLeft} hour\${startingFlightTimeLeft==1?"":"s"} left on your flight, what shall you do
     to pass the time?`,
     options: [
       {

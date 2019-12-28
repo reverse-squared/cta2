@@ -5,7 +5,24 @@ import schema from '../../../../scene.schema.json';
 monaco.editor.defineTheme('cta', {
   base: 'vs-dark',
   inherit: true,
-  rules: [{ background: '#191b1b', token: '#ffffff' }],
+  rules: [
+    {
+      token: 'string.key.json',
+      foreground: '#64ed98',
+    },
+    {
+      token: 'string.value.json',
+      foreground: '#64bded',
+    },
+    {
+      token: 'number.json',
+      foreground: '#ed9464',
+    },
+    {
+      token: 'keyword.json',
+      foreground: '#ed9464',
+    },
+  ],
   colors: {
     'editor.background': '#23302b',
     'editorIndentGuide.background': '#384f48',

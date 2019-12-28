@@ -14,8 +14,6 @@ import { builtInScenes, createErrorScene } from './built-in-scenes';
 
 const parser = new Parser();
 
-console.log(parser);
-
 export interface GameState {
   /** Custom Variables */
   [key: string]: any;
@@ -39,6 +37,7 @@ export interface GameState {
   title: string;
   /** Evaluates a math expression */
   eval: typeof evalMath;
+  __internal_isBuiltInScene: typeof isBuiltInScene;
   /** Creates an error scene and assigns it into this state. */
   __internal_createErrorScene: (id: string, error: any) => void;
   /** @internal Emitter for state changes. Used in Game to handle re-rendering. */
@@ -55,6 +54,8 @@ function resetGameState(this: GameState, defaultStartingScene: string, startingS
     });
   this.prevScene = '@null';
   this.scene = '@null';
+  this.title = 'Community Text Adventure';
+  this.visitedScenes = [];
   this.goToScene('/' + (startingScene || defaultStartingScene || 'built-in/start'));
 }
 
@@ -71,6 +72,7 @@ export function createGameState(
     isEndingAchieved: isEndingAchieved,
     setEndingAsAchieved: setEndingAsAchieved,
     setEndingAsNotAchieved: setEndingAsNotAchieved,
+    __internal_isBuiltInScene: isBuiltInScene,
     reset: () => {},
     eval: evalMath,
     __internal_eventListener: eventListener || new SimpleEmitter(),
@@ -91,6 +93,7 @@ function evalMath(this: GameState, input: string | string[]) {
   try {
     output = parser.evaluate(expr, this);
   } catch (error) {
+    console.warn('Error in expression:', expr);
     throw error;
   }
   return output;
@@ -175,4 +178,8 @@ function goToScene(this: GameState, link: string) {
     }
   }
   this.__internal_eventListener.emit();
+}
+
+function isBuiltInScene(id: string) {
+  return id in builtInScenes;
 }

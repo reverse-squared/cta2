@@ -2,7 +2,7 @@ import React from 'react';
 import { FancyTextMakerString } from '../../shared/types';
 import { GameState } from '../gameState';
 
-import './css/ftm.css';
+import '../css/ftm.css';
 
 interface FancyTextProps {
   text: FancyTextMakerString;

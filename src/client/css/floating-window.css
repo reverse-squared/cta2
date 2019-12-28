@@ -1,0 +1,8 @@
+.floating-window {
+  position: fixed;
+  background: white;
+  top: 0;
+  left: 0;
+  width: 500px;
+  height: 700px;
+}
