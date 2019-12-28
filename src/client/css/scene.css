@@ -44,15 +44,67 @@
 .ending {
   background-color: #354942;
   padding: 24px;
-  margin-top: 50px;
+  margin-top: 16px;
   margin-bottom: 24px;
+}
+
+.ending p {
+  margin: 0;
 }
 
 .endingTitle {
   font-size: 26px;
   font-weight: bold;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   text-align: center;
 }
 .endingDescription {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.ending-text {
+  margin-top: 80px;
+  text-align: center;
+}
+.ending-text-old {
+  color: rgba(127, 255, 234, 0.6);
+}
+.ending-text-new {
+  animation: ending-text-flash 0.45s infinite;
+}
+
+@keyframes ending-text-flash {
+  0%,
+  49%,
+  100% {
+    color: #7fffea;
+  }
+  50%,
+  99% {
+    color: #a7ffdd;
+  }
+}
+
+.ending-bar {
+  background-color: rgba(0, 0, 0, 0.3);
+  width: 100%;
+  height: 18px;
+  position: relative;
+  border-radius: 5px;
+  margin-bottom: 30px;
+}
+
+.ending-bar-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: #7fffea;
+  border-radius: 5px;
+}
+
+.ending-progress-text {
+  color: #7fffea;
+  text-align: center;
 }

@@ -16,8 +16,6 @@ function RawEditor({ code, onCodeChange }: SceneEditorEditorProps) {
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       editorRef.current = editor;
 
-      console.log('mounted');
-
       model.setValue(code);
 
       editor.setModel(model);

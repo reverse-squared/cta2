@@ -1,15 +1,14 @@
-const endingsCompleted: Set<string> = new Set();
+const endingsAchieved: Set<string> = new Set();
 
-export function getCompletedEndingList(): Set<string> {
-  return endingsCompleted;
+export function getAchievedEndingSet(): Set<string> {
+  return endingsAchieved;
 }
-
 export function setEndingAsNotAchieved(id: string) {
-  endingsCompleted.delete(id);
+  endingsAchieved.delete(id);
 }
 export function setEndingAsAchieved(id: string) {
-  endingsCompleted.add(id);
+  endingsAchieved.add(id);
 }
 export function isEndingAchieved(id: string) {
-  return endingsCompleted.has(id);
+  return endingsAchieved.has(id);
 }

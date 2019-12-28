@@ -37,7 +37,7 @@ function mapFTMPart(part: FTMPart, index: number) {
 
 function FancyText({ text, state, inline, disableLinks }: FancyTextProps) {
   if (text.startsWith('=')) {
-    text = String(state.eval(text.substr(1)));
+    text = String(state.eval(text.substr(1), `FancyTextExpression`));
   }
   if (text.startsWith('\\=')) {
     text.substr(2);
@@ -45,7 +45,7 @@ function FancyText({ text, state, inline, disableLinks }: FancyTextProps) {
   text = text
     .replace(/\\?\${([^}]+)}/g, (string, code) => {
       if (string.startsWith('\\')) return string.substr(1);
-      return String(state.eval(code));
+      return String(state.eval(code, `FancyTextInlineExpression`));
     })
     .replace(/^\s+$/gm, '')
     .replace(/\n\n+/, '\n\n');

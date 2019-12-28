@@ -46,7 +46,10 @@ function SceneEditor({ state }: SceneEditorProps) {
     previewedScene = createErrorScene(sceneEditorId, error);
   }
 
-  const passedState = useMemo(() => createGameState(sceneEditorId), [code]);
+  const passedState = useMemo(
+    () => createGameState(sceneEditorId, { [sceneEditorId]: previewedScene }),
+    [code]
+  );
 
   const Editor = editors[editor];
 
@@ -63,6 +66,9 @@ function SceneEditor({ state }: SceneEditorProps) {
 
   const resetPreviewState = useCallback(() => {
     passedState.reset(sceneEditorId);
+  }, [passedState]);
+  const toggleInspector = useCallback(() => {
+    passedState.__internal_toggleInspector();
   }, [passedState]);
 
   useEffect(() => {
@@ -119,6 +125,7 @@ function SceneEditor({ state }: SceneEditorProps) {
       <div className='editorPreview'>
         <div className='preview-toolbar'>
           <button onClick={resetPreviewState}>Reset</button>
+          <button onClick={toggleInspector}>Inspect</button>
           <div style={{ fontSize: '16px' }}>
             Current Scene: <code>{passedState.scene}</code>
           </div>
@@ -128,7 +135,7 @@ function SceneEditor({ state }: SceneEditorProps) {
           extraScenes={{
             [sceneEditorId]: previewedScene,
           }}
-          isSceneEditorPreview
+          sceneEditorId={sceneEditorId}
         />
       </div>
     </div>

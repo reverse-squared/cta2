@@ -6,8 +6,8 @@ const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-export const VOTING_PERIOD = 10 * SECOND;
-// export const VOTING_PERIOD = 1 * DAY;
+// export const VOTING_PERIOD = 10 * SECOND;
+export const VOTING_PERIOD = 1 * DAY;
 
 export interface SceneRequest {
   uuid: string;

@@ -15,8 +15,10 @@ let bot: Discord.Client;
 let votingChannel: Discord.TextChannel;
 let archiveChannel: Discord.TextChannel;
 
+const botIsEnabled = env.bot.token && env.bot.votingChannel;
+
 export function initBot() {
-  if (env.bot.token && env.bot.votingChannel) {
+  if (botIsEnabled && env.bot.token && env.bot.votingChannel) {
     bot = new Discord.Client();
     bot.login(env.bot.token);
 
@@ -198,7 +200,15 @@ async function watchForVoting(request: SceneRequest) {
   }, request.ends - Date.now());
 }
 
-export async function postSceneNew(id: string, scene: Scene) {
+export async function postScene(id: string, scene: Scene) {
+  if (!botIsEnabled) {
+    console.warn(
+      'WARNING: The discord bot is not enabled. Scene ' + id + ' was added without voting.'
+    );
+    createScene(id, scene);
+    return;
+  }
+
   const now = Date.now();
 
   const embed = getDiscordEmbed(id, scene, now, 'open');

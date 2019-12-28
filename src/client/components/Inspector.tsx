@@ -24,7 +24,14 @@ export interface CTAInspectorProps {
 
 function CTAInspector({ state, onClose }: CTAInspectorProps) {
   return (
-    <FloatingWindow title='State Inspector' onClose={onClose}>
+    <FloatingWindow
+      title={
+        state.__internal_isSceneEditorPreview
+          ? 'State Inspector (Scene Preview)'
+          : 'State Inspector'
+      }
+      onClose={onClose}
+    >
       <div style={{ padding: '8px' }}>
         <Inspector
           data={{

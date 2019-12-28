@@ -4,8 +4,10 @@
   top: 0;
   left: 0;
   width: 500px;
-  height: 700px;
+  height: 400px;
+  overflow-y: auto;
   border: 1px solid black;
+  z-index: 1000;
 }
 .floating-window-drag-bar {
   display: flex;

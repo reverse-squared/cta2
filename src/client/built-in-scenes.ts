@@ -2,6 +2,8 @@ import { StringObject } from './type-shorthand';
 import { Scene } from '../shared/types';
 import cta2BuiltInScenes from '../story/cta2';
 
+const errorCSS = 'body{background:#302525}';
+
 export function createErrorScene(id: string, error: any): Scene {
   return {
     type: 'scene',
@@ -10,21 +12,23 @@ export function createErrorScene(id: string, error: any): Scene {
     }\`\`\``,
     options: [
       {
-        label: 'Go back one step',
+        label: '="Go back one step"||(prevScene=="@null"?" (No Previous Scene)":"")',
         to: '@undo',
+        isDisabled: 'prevScene=="@null"',
       },
       {
         label: 'Reload Scene',
         to: '@reload',
+        isDisabled: '__internal_isBuiltInScene(scene)',
       },
       {
         label: 'Reset all',
         to: '@reset',
       },
     ],
-    css: 'body{background:#302525}',
+    css: errorCSS,
     source: null,
-    meta: 'error',
+    meta: 'loading-error',
   };
 }
 
@@ -62,12 +66,10 @@ export function create404Scene(id: string): Scene {
 export const builtInScenes: StringObject<Scene> = {
   'built-in/start': {
     type: 'scene',
-    passage: `Welcome to the **Community Text Adventure: Season 2 Beta**. This is the second installment
-      of Community Text Adventure where you (yes, you the player) can suggest new paths, endings,
-      and vote on others. Be sure to join the Discord server to be able to vote on new scenes.
-
-      Your help today will ensure the speedy and smooth release of the game on December 30th, 2019.
-      Any scenes created before that time will not be transferred over to the released game.`,
+    passage: `Welcome to the **Community Text Adventure: Season 2**. This is the second installment
+      of CTA, where you (yes, *you*, the player) can suggest new paths, endings, and vote to create
+      the story. Be sure to join the Discord server to be able to vote on new scenes.
+    `,
     options: [
       {
         label: 'Play CTA: Season 2',
@@ -100,6 +102,7 @@ export const builtInScenes: StringObject<Scene> = {
         to: 'https://reverse-squared.github.io/cta2/#/',
       },
     ],
+    meta: 'main-menu',
     source: null,
   },
   'built-in/credits': {
@@ -154,6 +157,24 @@ export const builtInScenes: StringObject<Scene> = {
         to: '@reset',
       },
     ],
+    source: null,
+  },
+  'built-in/runtime-error': {
+    type: 'scene',
+    passage: `At scene \`\${prevScene}\` during \`\${runtimeErrorSource}\` a runtime error occurred: \`\`\`\${runtimeErrorStack}\`\`\`\n\nExpression that errored was: \`\`\`\${runtimeErrorExpression}\`\`\``,
+    options: [
+      {
+        label: 'Return to scene.',
+        to: '@undo',
+        isDisabled: 'prevScene=="@null"',
+      },
+      {
+        label: 'Reset all',
+        to: '@reset',
+      },
+    ],
+    meta: 'runtime-error',
+    css: errorCSS,
     source: null,
   },
   ...cta2BuiltInScenes,

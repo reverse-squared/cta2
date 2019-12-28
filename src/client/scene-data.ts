@@ -29,7 +29,6 @@ export function useSceneData(id: string, extraScenes?: StringObject<Scene>): Sce
         } else {
           sceneCache[id] = create404Scene(id);
         }
-        rerender(Math.random());
       })
       .catch((error) => {
         sceneCache[id] = createErrorScene(id, error);

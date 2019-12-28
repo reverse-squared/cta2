@@ -1,16 +1,17 @@
 import { Parser } from '../expr-eval';
 import { StringObject } from './type-shorthand';
-import { deleteSceneFromCache } from './useSceneData';
+import { deleteSceneFromCache } from './scene-data';
 import path from 'path';
 import {
   setEndingAsAchieved,
   isEndingAchieved,
   setEndingAsNotAchieved,
-  getCompletedEndingList,
+  getAchievedEndingSet,
 } from './ending';
 import { SimpleEmitter } from '@reverse/emitter';
-import { getSceneData } from './useSceneData';
+import { getSceneData } from './scene-data';
 import { builtInScenes, createErrorScene } from './built-in-scenes';
+import { Scene } from '../shared/types';
 
 const parser = new Parser();
 
@@ -61,7 +62,7 @@ function resetGameState(this: GameState, defaultStartingScene: string, startingS
 
 export function createGameState(
   startingScene: string = 'built-in/start',
-  eventListener?: SimpleEmitter<[]>
+  extraScenes?: StringObject<Scene>
 ): GameState {
   const state: GameState = {
     title: 'Community Text Adventure',
@@ -75,8 +76,9 @@ export function createGameState(
     __internal_isBuiltInScene: isBuiltInScene,
     reset: () => {},
     eval: evalMath,
-    __internal_eventListener: eventListener || new SimpleEmitter(),
+    __internal_eventListener: new SimpleEmitter(),
     __internal_createErrorScene: createErrorSceneOnState,
+    __internal_extraScenes: extraScenes,
   };
   // bind
   state.reset = resetGameState.bind(state, startingScene);
@@ -87,14 +89,18 @@ export function createGameState(
   return state;
 }
 
-function evalMath(this: GameState, input: string | string[]) {
+function evalMath(this: GameState, input: string | string[], source: string) {
   const expr = Array.isArray(input) ? input.map((x) => `(${x})`).join('and') : input;
   let output;
   try {
     output = parser.evaluate(expr, this);
   } catch (error) {
-    console.warn('Error in expression:', expr);
-    throw error;
+    this.prevScene = this.scene;
+    this.scene = 'built-in/runtime-error';
+    this.runtimeErrorSource = source;
+    this.runtimeErrorStack = error ? error.message || error : error;
+    this.runtimeErrorExpression = expr;
+    this.__internal_eventListener.emit();
   }
   return output;
 }
@@ -104,23 +110,28 @@ const atLinks: StringObject<(state: GameState) => void> = {
     deleteSceneFromCache(state.scene);
   },
   '@undo': (state) => {
+    delete state.runtimeErrorSource;
+    delete state.runtimeErrorStack;
+    delete state.runtimeErrorExpression;
+
     state.scene = state.prevScene;
     state.prevScene = '@null';
   },
   '@reset': (state) => {
-    if (state.__internal_isSceneEditorPreview) {
-      state.reset();
-    } else {
-      state.reset();
-    }
+    state.reset();
   },
   '@null': () => {},
   '@end': (state) => {
-    state.setEndingAsAchieved(state.scene);
-    if (getCompletedEndingList().size === 1) {
-      state.reset('built-in/first-time-introduction');
+    if (state.__internal_isSceneEditorPreview) {
+      state.reset();
     } else {
-      state.reset('built-in/start');
+      const achieved = getAchievedEndingSet().size;
+      state.setEndingAsAchieved(state.scene);
+      if (achieved === 0) {
+        state.reset('built-in/first-time-introduction');
+      } else {
+        state.reset('built-in/start');
+      }
     }
   },
 };
@@ -132,8 +143,11 @@ function goToScene(this: GameState, link: string) {
     if (atLinks[link]) {
       atLinks[link](this);
     } else {
-      // todo: catch these on renderer
-      // throw new Error(`at-link ${link} not valid.`);
+      this.prevScene = this.scene;
+      this.scene = 'built-in/runtime-error';
+      this.runtimeErrorSource = 'goToScene';
+      this.runtimeErrorStack = `at-link ${link} is not valid.`;
+      this.runtimeErrorExpression = link;
     }
   } else if (link.startsWith('http://') || link.startsWith('https://')) {
     window.open(link);
@@ -143,14 +157,14 @@ function goToScene(this: GameState, link: string) {
     if (scene && scene.type === 'scene') {
       if (scene.onDeactivate) {
         try {
-          this.eval(scene.onDeactivate);
+          this.eval(scene.onDeactivate, 'onDeactivate');
         } catch (error) {
           this.createErrorScene(this.scene, error);
         }
       }
       if (!this.visitedScenes.includes(this.scene)) {
         if (scene.onFirstDeactivate) {
-          this.eval(scene.onFirstDeactivate);
+          this.eval(scene.onFirstDeactivate, 'onFirstDeactivate');
         }
         this.visitedScenes.push(this.scene);
       }
@@ -167,13 +181,15 @@ function goToScene(this: GameState, link: string) {
       this.scene = builtInScenes[this.scene].meta.substr(9);
     }
 
-    const scene2 = getSceneData(this.scene);
+    const scene2 =
+      (this.__internal_extraScenes && this.__internal_extraScenes[this.scene]) ||
+      getSceneData(this.scene);
     if (scene2 && scene2.type === 'scene') {
       if (!this.visitedScenes.includes(this.scene) && scene2.onFirstActivate) {
-        this.eval(scene2.onFirstActivate);
+        this.eval(scene2.onFirstActivate, 'onFirstActivate');
       }
       if (scene2.onActivate) {
-        this.eval(scene2.onActivate);
+        this.eval(scene2.onActivate, 'onActivate');
       }
     }
   }

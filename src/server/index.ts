@@ -5,7 +5,7 @@ import path from 'path';
 
 import { initBot } from '../discord-bot/bot';
 import { getScene } from './scene';
-import { connectToDatabase, runDb, ctaDb } from './database';
+import { connectToDatabase, runDb, ctaDb, getAllEndings } from './database';
 
 // Connect to the database
 connectToDatabase();
@@ -32,4 +32,8 @@ app.get('/api/scene/*', async (req, res) => {
   } else {
     res.send({ exists: false });
   }
+});
+
+app.get('/api/endings', async (req, res) => {
+  res.send(await getAllEndings());
 });
