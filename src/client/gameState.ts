@@ -10,7 +10,7 @@ import {
 } from './ending';
 import { SimpleEmitter } from '@reverse/emitter';
 import { getSceneData } from './useSceneData';
-import { builtInScenes } from './built-in-scenes';
+import { builtInScenes, createErrorScene } from './built-in-scenes';
 
 const parser = new Parser();
 
@@ -39,6 +39,8 @@ export interface GameState {
   title: string;
   /** Evaluates a math expression */
   eval: typeof evalMath;
+  /** Creates an error scene and assigns it into this state. */
+  __internal_createErrorScene: (id: string, error: any) => void;
   /** @internal Emitter for state changes. Used in Game to handle re-rendering. */
   __internal_eventListener: SimpleEmitter<[]>;
 }
@@ -72,10 +74,12 @@ export function createGameState(
     reset: () => {},
     eval: evalMath,
     __internal_eventListener: eventListener || new SimpleEmitter(),
+    __internal_createErrorScene: createErrorSceneOnState,
   };
   // bind
   state.reset = resetGameState.bind(state, startingScene);
   state.goToScene = state.goToScene.bind(state);
+  state.__internal_createErrorScene = state.createErrorSceneOnState.bind(state);
   // initial
   state.goToScene('/' + startingScene);
   return state;
@@ -118,6 +122,8 @@ const atLinks: StringObject<(state: GameState) => void> = {
   },
 };
 
+function createErrorSceneOnState(this: GameState, id: string, error: any) {}
+
 function goToScene(this: GameState, link: string) {
   if (link.startsWith('@')) {
     if (atLinks[link]) {
@@ -133,7 +139,11 @@ function goToScene(this: GameState, link: string) {
     const scene = getSceneData(this.scene);
     if (scene && scene.type === 'scene') {
       if (scene.onDeactivate) {
-        this.eval(scene.onDeactivate);
+        try {
+          this.eval(scene.onDeactivate);
+        } catch (error) {
+          this.createErrorScene(this.scene, error);
+        }
       }
       if (!this.visitedScenes.includes(this.scene)) {
         if (scene.onFirstDeactivate) {

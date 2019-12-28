@@ -116,7 +116,25 @@ export const builtInScenes: StringObject<Scene> = {
     passage:
       "This is the Scene Editor. If this text is showing and the scene editor isn't, that's a problem.",
     options: [],
+    onActivate: 'oldTitle=title;title="Yikes!"',
+    onDeactivate: 'title=oldTitle',
     meta: 'scene-editor',
+    source: null,
+  },
+  'built-in/scene-editor-too-small': {
+    type: 'scene',
+    passage:
+      'The Scene Editor is too big for your screen! Browser window must be at least 1145 pixels wide.',
+    options: [
+      {
+        label: 'Go back one step',
+        to: '@undo',
+      },
+      {
+        label: 'Return to the Main Menu',
+        to: '@reset',
+      },
+    ],
     source: null,
   },
   ...cta2BuiltInScenes,

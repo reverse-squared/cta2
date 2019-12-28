@@ -1,5 +1,5 @@
-/** String parsable as a math expression. Arrays are joined with AND operators.  */
-export type MathExpressionString = string | string[];
+/** String parsable as a math expression. */
+export type MathExpressionString = string;
 /** Text sent through the Fancy Text Maker system */
 export type FancyTextMakerString = string;
 

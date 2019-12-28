@@ -10,7 +10,7 @@ import Game from './Game';
 import { Scene, Source } from '../shared/types';
 import { validateScene } from '../shared/validateScene';
 
-import { createErrorScene } from './built-in-scenes';
+import { createErrorScene, builtInScenes } from './built-in-scenes';
 import { modelUri } from './monaco-config';
 import { TextareaChangeEvent, InputChangeEvent } from './type-shorthand';
 import { SchemaError } from 'jsonschema';
@@ -339,7 +339,15 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
 
         <h2>Scene Passage</h2>
         <div>
-          <textarea value={scene.passage} onChange={onPassageUpdate} rows={4} cols={50} />
+          <textarea
+            value={scene.passage}
+            onChange={onPassageUpdate}
+            rows={(() => {
+              const x = scene.passage.match(/.{61}|.{0,61}(\n|$)/g);
+              return Math.max((x || []).length, 4);
+            })()}
+            cols={50}
+          />
         </div>
         <p className='helper-text'>
           A small paragraph or two about what's happening in the story in this scene. Displayed at
@@ -401,31 +409,43 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
               </button>
               <button onClick={handleAddAnotherSeparator}>Add Separator</button>
             </div>
-            <h2>[the on* things]</h2>
+            <h2>Event Handlers</h2>
             <p>onActivate</p>
             <textarea
-              rows={4}
+              rows={(() => {
+                const x = (scene.onActivate || '').match(/.{61}|.{0,61}(\n|$)/g);
+                return (x || []).length;
+              })()}
               cols={50}
               value={scene.onActivate}
               onChange={handleOnActivateChange}
             />
             <p>onFirstActivate</p>
             <textarea
-              rows={4}
+              rows={(() => {
+                const x = (scene.onFirstActivate || '').match(/.{61}|.{0,61}(\n|$)/g);
+                return (x || []).length;
+              })()}
               cols={50}
               value={scene.onFirstActivate}
               onChange={handleOnFirstActivateChange}
             />
             <p>onDeactivate</p>
             <textarea
-              rows={4}
+              rows={(() => {
+                const x = (scene.onDeactivate || '').match(/.{61}|.{0,61}(\n|$)/g);
+                return (x || []).length;
+              })()}
               cols={50}
               value={scene.onDeactivate}
               onChange={handleOnDeactivateChange}
             />
             <p>onFirstDeactivate</p>
             <textarea
-              rows={4}
+              rows={(() => {
+                const x = (scene.onFirstDeactivate || '').match(/.{61}|.{0,61}(\n|$)/g);
+                return (x || []).length;
+              })()}
               cols={50}
               value={scene.onFirstDeactivate}
               onChange={handleOnFirstDeactivateChange}
@@ -433,9 +453,9 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
           </>
         ) : (
           <>
-            <h2>[ending title]</h2>
+            <h2>Ending Title</h2>
             <input value={scene.title} onChange={handleEndingTitleChange} />
-            <h2>[ending description]</h2>
+            <h2>Ending Description</h2>
             <textarea
               value={scene.description}
               onChange={handleEndingDescriptionUpdate}
@@ -449,7 +469,15 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
           Add custom styling to this scene with CSS. See the{' '}
           <a href='/todo_docs_css'>documentation</a> on how to select elements from the scene.
         </p>
-        <textarea value={scene.css} onChange={handleCssChange} rows={7} cols={50} />
+        <textarea
+          value={scene.css}
+          onChange={handleCssChange}
+          rows={(() => {
+            const x = (scene.css || '').match(/.{61}|.{0,61}(\n|$)/g);
+            return Math.max((x || []).length, 5);
+          })()}
+          cols={50}
+        />
         <h2>[source]</h2>
         {sources.map((source: { name: string; desc?: string }, index: number) => {
           return (
@@ -520,6 +548,30 @@ export function SceneEditor({ state }: SceneEditorProps) {
   const resetPreviewState = useCallback(() => {
     passedState.reset(sceneEditorId);
   }, [passedState, sceneEditorId]);
+
+  const [width, setWidth] = useState(window.innerWidth);
+  useEffect(() => {
+    function handler() {
+      setWidth(window.innerWidth);
+    }
+    window.addEventListener('resize', handler);
+    return () => {
+      window.removeEventListener('resize', handler);
+    };
+  }, []);
+
+  if (width < 1145) {
+    return (
+      <>
+        <Game
+          state={state}
+          extraScenes={{
+            'built-in/scene-editor': builtInScenes['built-in/scene-editor-too-small'],
+          }}
+        />
+      </>
+    );
+  }
 
   return (
     <div className='editor'>
