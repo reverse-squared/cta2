@@ -91,7 +91,7 @@ function Game({ state, extraScenes, isSceneEditorPreview }: GameProps) {
   const title = state.title || 'Community Text Adventure';
   return (
     <div className='sceneWrap'>
-      {inspector && <CTAInspector state={state} />}
+      {inspector && <CTAInspector state={state} onClose={state.__internal_toggleInspector} />}
       <div className={'scene'}>
         {title && <h1>{title}</h1>}
         {scene.css && <style>{scene.css}</style>}

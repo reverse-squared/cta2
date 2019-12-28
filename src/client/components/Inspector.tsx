@@ -19,25 +19,28 @@ const nodeRenderer = ({ depth, name, data, isNonenumerable }: InspectorNodeParam
 
 export interface CTAInspectorProps {
   state: GameState;
+  onClose: () => void;
 }
 
-function CTAInspector({ state }: CTAInspectorProps) {
+function CTAInspector({ state, onClose }: CTAInspectorProps) {
   return (
-    <FloatingWindow>
-      <Inspector
-        data={{
-          [Symbol.toStringTag]: 'GameState',
-          ...Object.keys(state)
-            .filter((x) => !x.startsWith('__internal'))
-            .reduce((obj: any, key) => {
-              obj[key] = state[key];
-              return obj;
-            }, {}),
-        }}
-        sortObjectKeys
-        nodeRenderer={nodeRenderer}
-        expandLevel={1}
-      />
+    <FloatingWindow title='State Inspector' onClose={onClose}>
+      <div style={{ padding: '8px' }}>
+        <Inspector
+          data={{
+            [Symbol.toStringTag]: 'GameState',
+            ...Object.keys(state)
+              .filter((x) => !x.startsWith('__internal'))
+              .reduce((obj: any, key) => {
+                obj[key] = state[key];
+                return obj;
+              }, {}),
+          }}
+          sortObjectKeys
+          nodeRenderer={nodeRenderer}
+          expandLevel={1}
+        />
+      </div>
     </FloatingWindow>
   );
 }

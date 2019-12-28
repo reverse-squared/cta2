@@ -1,8 +1,35 @@
 .floating-window {
   position: fixed;
-  background: white;
+  background-color: white;
   top: 0;
   left: 0;
   width: 500px;
   height: 700px;
+  border: 1px solid black;
+}
+.floating-window-drag-bar {
+  display: flex;
+  height: 30px;
+  background-color: #666;
+  border-bottom: 1px solid black;
+  line-height: 30px;
+  user-select: none;
+}
+.floating-window-title {
+  flex: 1;
+  margin-left: 10px;
+}
+.floating-window-close-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  border-left: 1px solid black;
+  background-color: rgb(122, 9, 9);
+}
+.floating-window-close-button:hover {
+  background-color: rgb(151, 12, 12);
+}
+.floating-window-close-button:active {
+  background-color: red;
 }
