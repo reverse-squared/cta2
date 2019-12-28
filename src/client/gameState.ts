@@ -78,8 +78,8 @@ export function createGameState(
   };
   // bind
   state.reset = resetGameState.bind(state, startingScene);
-  state.goToScene = state.goToScene.bind(state);
-  state.__internal_createErrorScene = state.createErrorSceneOnState.bind(state);
+  state.goToScene = goToScene.bind(state);
+  state.__internal_createErrorScene = createErrorSceneOnState.bind(state);
   // initial
   state.goToScene('/' + startingScene);
   return state;

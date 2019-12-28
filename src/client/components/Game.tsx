@@ -1,14 +1,13 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import clsx from 'clsx';
-import { Source, Scene } from '../shared/types';
+import { Source, Scene } from '../../shared/types';
 import FancyText from './FancyText';
-import { AnchorClickEvent, StringObject } from './type-shorthand';
-import { useSceneData } from './useSceneData';
-import { GameState } from './gameState';
+import { AnchorClickEvent, StringObject } from '../type-shorthand';
+import { useSceneData } from '../useSceneData';
+import { GameState } from '../gameState';
 import './css/scene.css';
-import { SceneEditor } from './SceneEditor';
 import Credits from './Credits';
-import { builtInScenes } from './built-in-scenes';
+import SceneEditor from './SceneEditor/SceneEditor';
 
 export interface GameProps {
   state: GameState;

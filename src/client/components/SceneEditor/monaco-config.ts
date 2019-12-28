@@ -1,6 +1,6 @@
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
-import schema from '../../scene.schema.json';
+import schema from '../../../../scene.schema.json';
 
 monaco.editor.defineTheme('cta', {
   base: 'vs-dark',
@@ -12,13 +12,8 @@ monaco.editor.defineTheme('cta', {
   },
 });
 
-export const modelUri = monaco.Uri.parse(
-  'a://b/' +
-    Math.random()
-      .toString()
-      .substr(2) +
-    '.json'
-); // a made up unique URI for our model
+// a made up unique URI for our model
+export const modelUri = monaco.Uri.parse('cta://scene-editor.json');
 
 monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
   validate: true,
