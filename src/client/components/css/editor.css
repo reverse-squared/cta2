@@ -169,3 +169,25 @@
 .veditor-separator {
   border-bottom: 1px solid white;
 }
+
+.preview-toolbar {
+  display: flex;
+  height: 32px;
+  background-color: #191b1b;
+  line-height: 32px;
+}
+.preview-toolbar button {
+  color: #aaa;
+  font-size: 18px;
+  background-color: #203f33;
+  border: 1px solid #203f33;
+  margin-right: 10px;
+}
+.preview-toolbar button:focus {
+  border: 1px solid #64ed98;
+  outline: none;
+}
+.preview-toolbar button:active {
+  background-color: #64ed98;
+  color: black;
+}

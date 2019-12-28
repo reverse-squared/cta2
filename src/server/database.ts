@@ -1,5 +1,4 @@
 import r, { Operation } from 'rethinkdb';
-import { EndingScene } from '../shared/types';
 
 const DB_NAME = 'cta2';
 
@@ -37,6 +36,7 @@ export async function connectToDatabase() {
 
   await createTable('scenes', {}, ['type']);
   await createTable('requests', { primary_key: 'uuid' }, ['id']);
+  await createTable('sources', { primary_key: 'name' }, []);
 }
 
 export function ctaDb() {

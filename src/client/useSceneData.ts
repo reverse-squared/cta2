@@ -10,9 +10,14 @@ const requests: Set<string> = new Set();
 export function deleteSceneFromCache(id: string) {
   delete sceneCache[id];
 }
+export function getSceneData(id: string) {
+  return sceneCache[id] || null;
+}
 
-export function useSceneData(id: string): Scene | null {
+export function useSceneData(id: string, extraScenes?: StringObject<Scene>): Scene | null {
   const [, rerender] = useState(0);
+
+  if (extraScenes && extraScenes[id]) return extraScenes[id];
 
   if (!(id in sceneCache) && !requests.has(id)) {
     requests.add(id);

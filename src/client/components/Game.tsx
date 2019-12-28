@@ -1,19 +1,18 @@
-import React, { useCallback, useMemo, useState, useEffect, useDebugValue } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { Source, Scene } from '../../shared/types';
 import FancyText from './FancyText';
-import { AnchorClickEvent } from '../type-shorthand';
+import { AnchorClickEvent, StringObject } from '../type-shorthand';
 import { useSceneData, deleteSceneFromCache } from '../useSceneData';
-import { GameState, evalMath, goToScene } from '../gameState';
+import { GameState } from '../gameState';
 import './css/scene.css';
 import { SceneEditor } from './SceneEditor/SceneEditor';
 import Credits from './Credits';
 
 export interface GameProps {
   state: GameState;
-  editorPreview?: {
-    scene: Scene;
-  };
+  extraScenes?: StringObject<Scene>;
+  isSceneEditorPreview?: boolean;
 }
 
 const listFormatter = new (Intl as any).ListFormat('en', { style: 'long', type: 'conjunction' });
@@ -36,65 +35,48 @@ function formatSource(input: Source | Source[] | string | null): string {
   }
 }
 
-function Game({ state, editorPreview }: GameProps) {
+function Game({ state, extraScenes, isSceneEditorPreview }: GameProps) {
   const [, setRenderNumber] = useState(0);
-  const rerender = () => setRenderNumber(Math.random());
 
   if (!state.visitedScenes) state.visitedScenes = [];
 
-  const scene = editorPreview ? editorPreview.scene : useSceneData(state.scene);
+  const scene = useSceneData(state.scene, extraScenes);
+
+  state.__internal_isSceneEditorPreview = isSceneEditorPreview;
 
   const handleOptionClick = useCallback(
     (ev: AnchorClickEvent) => {
       ev.preventDefault();
-      if (editorPreview) {
-        return;
-      }
       if (scene !== null && scene.type === 'scene') {
         const index = parseInt(ev.currentTarget.getAttribute('option-id') || '');
         const option = scene.options[index];
         if (option !== 'separator') {
           if (option.onActivate) {
-            evalMath(state, option.onActivate);
+            state.eval(option.onActivate);
           }
           if (option.to) {
-            goToScene(state, option.to);
+            state.goToScene(option.to);
           }
-          rerender();
         }
+      } else if (ev.currentTarget.getAttribute('option-id') === 'end') {
+        state.goToScene('@end');
       }
     },
     [scene]
   );
 
-  useMemo(() => {
-    if (scene) {
-      if (scene.type === 'scene') {
-        if (scene.onActivate) {
-          evalMath(state, scene.onActivate);
-        }
-        if (!state.visitedScenes.includes(state.scene) && scene.onFirstActivate) {
-          evalMath(state, scene.onFirstActivate);
-        }
-        return () => {
-          if (scene.onDeactivate) {
-            evalMath(state, scene.onDeactivate);
-          }
-          if (!state.visitedScenes.includes(state.scene)) {
-            if (scene.onFirstDeactivate) {
-              evalMath(state, scene.onFirstDeactivate);
-            }
-            state.visitedScenes.push(state.scene);
-          }
-        };
-      }
-    }
-  }, [scene]);
+  useEffect(() => {
+    const rerender = () => setRenderNumber(Math.random());
+    state.__internal_eventListener.addListener(rerender);
+    return () => {
+      state.__internal_eventListener.removeListener(rerender);
+    };
+  }, [state]);
 
   if (scene === null) {
     return null;
   }
-  if (!editorPreview && scene.meta === 'scene-editor') {
+  if (!isSceneEditorPreview && scene.meta === 'scene-editor') {
     return <SceneEditor state={state} />;
   }
 
@@ -122,13 +104,13 @@ function Game({ state, editorPreview }: GameProps) {
                 } else {
                   let visible = true;
                   if (option.isVisible) {
-                    visible = !!evalMath(state, option.isVisible);
+                    visible = !!state.eval(option.isVisible);
                   }
                   if (visible) {
                     justOutputtedSeparator = false;
                     let disabled = false;
                     if (option.isDisabled) {
-                      disabled = !!evalMath(state, option.isDisabled);
+                      disabled = !!state.eval(option.isDisabled);
                     }
                     return (
                       <li key={i} className={clsx('option', disabled && 'optionDisabled')}>

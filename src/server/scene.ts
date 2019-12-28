@@ -78,4 +78,22 @@ export async function createScene(id: string, scene: Scene) {
       .table('scenes')
       .insert({ id: id, scene: scene })
   );
+
+  const sources: { name: string; desc?: string }[] =
+    scene.source === null
+      ? []
+      : typeof scene.source === 'string'
+      ? [{ name: scene.source }]
+      : Array.isArray(scene.source)
+      ? scene.source.map((source) => (typeof source === 'string' ? { name: source } : source))
+      : [scene.source];
+  await Promise.all(
+    sources.map((source) =>
+      runDb(
+        ctaDb()
+          .table('sources')
+          .replace({ name: source.name })
+      )
+    )
+  );
 }

@@ -11,7 +11,7 @@ function Credits() {
           </a>
         </li>
         <li className='option'>
-          <a className='optionLink' href='https://harcells.netlify.com'>
+          <a className='optionLink' href='https://hparcells.netlify.com'>
             Hunter Parcells
           </a>
         </li>

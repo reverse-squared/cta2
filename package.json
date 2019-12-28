@@ -15,10 +15,10 @@
     "doc": "docs"
   },
   "dependencies": {
-    "@reverse/array": "^1.7.1",
+    "@reverse/array": "^1.7.3",
+    "@reverse/emitter": "^2.0.5",
     "@types/fs-extra": "^8.0.1",
     "discord.js": "^11.5.1",
-    "expr-eval": "^2.0.2",
     "fs-extra": "^8.1.0",
     "glob": "^7.1.6",
     "monaco-editor": "^0.19.0",
@@ -27,12 +27,12 @@
     "rethinkdb": "^2.4.2"
   },
   "devDependencies": {
-    "@types/rethinkdb": "^2.3.14",
     "@types/react-monaco-editor": "^0.16.0",
+    "@types/rethinkdb": "^2.3.14",
     "chalk": "^3.0.0",
     "clsx": "^1.0.4",
     "docsify": "^4.10.2",
-    "fullstack-system": "^2.7.2",
+    "fullstack-system": "^2.7.3",
     "json-schema-defaults": "^0.4.0",
     "jsonschema": "^1.2.5",
     "monaco-editor-webpack-plugin": "^1.8.1",

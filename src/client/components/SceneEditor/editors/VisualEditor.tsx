@@ -76,13 +76,13 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
     [scene, updateScene]
   );
 
-  const sources: Source[] =
+  const sources: { name: string; desc?: string }[] =
     scene.source === null
       ? []
       : typeof scene.source === 'string'
       ? [{ name: scene.source }]
       : Array.isArray(scene.source)
-      ? scene.source
+      ? scene.source.map((source) => (typeof source === 'string' ? { name: source } : source))
       : [scene.source];
 
   function handleAddAnotherOption() {
@@ -378,7 +378,7 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
         </p>
         <textarea value={scene.css} onChange={handleCssChange} rows={7} cols={50} />
         <h2>[source]</h2>
-        {sources.map((source: Source, index: number) => {
+        {sources.map((source: { name: string; desc?: string }, index: number) => {
           return (
             <div>
               <input

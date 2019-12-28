@@ -1,5 +1,6 @@
 import { StringObject } from './type-shorthand';
 import { Scene } from '../shared/types';
+import cta2BuiltInScenes from '../story/cta2';
 
 export function createErrorScene(id: string, error: any): Scene {
   return {
@@ -21,7 +22,7 @@ export function createErrorScene(id: string, error: any): Scene {
         to: '@reset',
       },
     ],
-    css: 'body{background:#232020}',
+    css: 'body{background:#302525}',
     source: null,
     meta: 'error',
   };
@@ -33,9 +34,9 @@ export function create404Scene(id: string): Scene {
     passage: `The scene \`${id}\` doesn't exist.`,
     options: [
       {
-        label: 'Request a scene',
-        to: '/built-in/scene-editor',
-        onActivate: `sceneEditorId="${id}"`,
+        label: 'Request this scene',
+        onActivate: `reset("/built-in/scene-editor");sceneEditorId="${id}"`,
+        isVisible: 'not __internal_isSceneEditorPreview',
       },
       'separator',
       {
@@ -46,13 +47,13 @@ export function create404Scene(id: string): Scene {
       {
         label: 'Reload Scene',
         to: '@reload',
+        isDisabled: '__internal_isBuiltInScene(scene)',
       },
       {
         label: 'Reset all',
         to: '@reset',
       },
     ],
-    css: 'body{background:#232020}',
     source: null,
     meta: '404',
   };
@@ -71,6 +72,10 @@ export const builtInScenes: StringObject<Scene> = {
       {
         label: 'Play CTA: Season 2',
         onActivate: 'reset("cta2/start")',
+      },
+      {
+        label: 'Open the Scene Editor',
+        onActivate: `reset("/built-in/scene-editor");sceneEditorId="built-in/demo"`,
       },
       'separator',
       {
@@ -114,4 +119,5 @@ export const builtInScenes: StringObject<Scene> = {
     meta: 'scene-editor',
     source: null,
   },
+  ...cta2BuiltInScenes,
 };

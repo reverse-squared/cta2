@@ -5,6 +5,7 @@ import './css/global.css';
 import { createGameState } from '../gameState';
 
 const state = createGameState('built-in/start');
+(window as any).state = state;
 
 function App() {
   return (
