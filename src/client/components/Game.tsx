@@ -11,31 +11,12 @@ import SceneEditor from './SceneEditor';
 import CTAInspector from './Inspector';
 import EndingProgress from './EndingProgress';
 import EndingList from './EndingList';
+import { formatSource } from '../../shared/utils/formatSource';
 
 export interface GameProps {
   state: GameState;
   extraScenes?: StringObject<Scene>;
   sceneEditorId?: string;
-}
-
-const listFormatter = new (Intl as any).ListFormat('en', { style: 'long', type: 'conjunction' });
-
-function formatSource(input: Source | Source[] | string | null): string {
-  if (input === null) {
-    return 'no one';
-  }
-  if (Array.isArray(input)) {
-    if (input.length === 0) {
-      return 'no one';
-    }
-    return listFormatter.format(input.map((x) => formatSource(x)));
-  } else {
-    if (typeof input === 'string') {
-      return input;
-    } else {
-      return input.name + (input.desc ? ` (${input.desc})` : '');
-    }
-  }
 }
 
 function Game({ state, extraScenes, sceneEditorId }: GameProps) {

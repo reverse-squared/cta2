@@ -8,6 +8,7 @@ import env from '../shared/env';
 import { createScene } from '../server/scene';
 import { createRequestInDb, SceneRequest, deleteRequest, getAllRequests } from './requests';
 import { runDb, ctaDb } from '../server/database';
+import { formatSource } from '../shared/utils/formatSource';
 
 const EMBED_COLOR = 0x64ed98;
 
@@ -52,18 +53,21 @@ function getDiscordEmbed(
 ) {
   const embedBase = {
     color: EMBED_COLOR,
-    footer:
-      state === 'open'
-        ? 'Voting Open!'
-        : `Voting Ended | Scene ${
-            {
-              'closed-accept': 'Added',
-              'closed-deny': 'Not Added',
-              'force-accept': 'Forcefully Added by Moderator',
-              'force-deny': 'Forcefully Not Added by Moderator',
-            }[state]
-          } | ${upvotes} 👍, ${downvotes} 👎`,
+    footer: {
+      text:
+        state === 'open'
+          ? 'Voting Open!'
+          : `Voting Ended | Scene ${
+              {
+                'closed-accept': 'Added',
+                'closed-deny': 'Not Added',
+                'force-accept': 'Forcefully Added by Moderator',
+                'force-deny': 'Forcefully Not Added by Moderator',
+              }[state]
+            } | ${upvotes} 👍, ${downvotes} 👎`,
+    },
     timestamp: time,
+    author: { name: formatSource(scene.source) },
   };
 
   const sceneEmbedPart =
@@ -147,12 +151,12 @@ async function watchForVoting(request: SceneRequest) {
       createScene(request.id, request.scene);
 
       archiveChannel.send({
-        embed: getDiscordEmbed(request.id, request.scene, request.ends, 'force-accept'),
+        embed: getDiscordEmbed(request.id, request.scene, Date.now(), 'force-accept'),
       });
     } else if (reaction.emoji.name === '❌') {
       // delete
       archiveChannel.send({
-        embed: getDiscordEmbed(request.id, request.scene, request.ends, 'force-deny'),
+        embed: getDiscordEmbed(request.id, request.scene, Date.now(), 'force-deny'),
       });
     } else {
       return;
