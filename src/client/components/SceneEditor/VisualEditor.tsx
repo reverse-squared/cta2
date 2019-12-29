@@ -239,7 +239,7 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
         <div className='veditor'>
           <h1>Error in Scene Formatting</h1>
           <pre className='ftm-blockCode'>{error.message || error}</pre>
-          <a href='#' onClick={reset}>
+          <a className='link' href='#' onClick={reset}>
             Reset your scene (Discards information)
           </a>
         </div>
@@ -355,8 +355,10 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
         <h2>Custom CSS</h2>
         <p className='helper-text'>
           Add custom styling to this scene with CSS. See the{' '}
-          <a href='https://reverse-squared.github.io/cta2/#/ftm'>documentation</a> on how to select
-          elements from the scene.
+          <a className='link' href='https://reverse-squared.github.io/cta2/#/ftm'>
+            documentation
+          </a>{' '}
+          on how to select elements from the scene.
         </p>
         <textarea
           value={scene.css}

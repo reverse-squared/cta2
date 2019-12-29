@@ -215,21 +215,17 @@ function SceneEditor({ state }: SceneEditorProps) {
               <span>Requested</span>{' '}
               <span style={{ fontSize: '20px' }}>
                 Join the{' '}
-                <span className='option'>
-                  <a className='optionLink' href='https://discord.gg/ABwjpk4'>
-                    Discord Server
-                  </a>
-                </span>{' '}
+                <a className='link' href='https://discord.gg/ABwjpk4'>
+                  Discord Server
+                </a>{' '}
                 to vote and discuss on the scene.
                 <br />
               </span>
               <span style={{ fontSize: '20px' }}>
                 Go back to the{' '}
-                <span className='option'>
-                  <a className='optionLink' href='#' onClick={goToMainMenu}>
-                    Main Menu
-                  </a>
-                </span>
+                <a className='link' href='#' onClick={goToMainMenu}>
+                  Main Menu
+                </a>
                 .
               </span>
             </>

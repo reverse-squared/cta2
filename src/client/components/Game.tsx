@@ -10,6 +10,7 @@ import Credits from './Credits';
 import SceneEditor from './SceneEditor';
 import CTAInspector from './Inspector';
 import EndingProgress from './EndingProgress';
+import EndingList from './EndingList';
 
 export interface GameProps {
   state: GameState;
@@ -163,6 +164,7 @@ function Game({ state, extraScenes, sceneEditorId }: GameProps) {
                   }
                 })}
               </ul>
+              {scene.meta === 'endings' && <EndingList state={state} />}
             </>
           ) : (
             <>

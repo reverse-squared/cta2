@@ -34,7 +34,7 @@ function MetadataEditor({ code, onCodeChange, meta, onMetaChange }: SceneEditorE
         <div className='veditor'>
           <h1>Error in Scene Formatting</h1>
           <pre className='ftm-blockCode'>{error.message || error}</pre>
-          <a href='#' onClick={reset}>
+          <a className='link' href='#' onClick={reset}>
             Reset your scene (Discards information)
           </a>
         </div>

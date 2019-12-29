@@ -64,6 +64,7 @@
 .endingDescription {
   margin-top: 10px;
   margin-bottom: 10px;
+  text-align: center;
 }
 
 .ending-text {
@@ -110,4 +111,8 @@
 .ending-progress-text {
   color: #7fffea;
   text-align: center;
+}
+
+h2 .link {
+  font-size: 14px;
 }

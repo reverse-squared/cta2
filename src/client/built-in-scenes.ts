@@ -77,18 +77,27 @@ export const builtInScenes: StringObject<Scene> = {
       },
       'separator',
       {
+        label: 'Credits',
+        to: 'credits',
+        isVisible: '__internal_hasAtLeastOneEnding',
+      },
+      {
+        label: 'View Endings',
+        to: 'endings',
+        isVisible: '__internal_hasAtLeastOneEnding',
+      },
+      'separator',
+      {
         label: '**DEBUG**: Scene Editor',
         onActivate: `reset("/built-in/scene-editor");sceneEditorId="built-in/demo"`,
+        isVisible: 'not __internal_PRODUCTION',
       },
       {
         label: '**DEBUG**: Inspector',
         onActivate: '__internal_toggleInspector()',
+        isVisible: 'not __internal_PRODUCTION',
       },
       'separator',
-      {
-        label: 'Credits',
-        to: '/built-in/credits',
-      },
       {
         label: 'Join the Discord Server',
         to: 'https://discord.gg/ABwjpk4',
@@ -117,6 +126,20 @@ export const builtInScenes: StringObject<Scene> = {
     onActivate: 'oldTitle=title;title="Credits"',
     onDeactivate: 'title=oldTitle',
     meta: 'credits',
+    source: null,
+  },
+  'built-in/endings': {
+    type: 'scene',
+    passage: '',
+    options: [
+      {
+        label: 'Back',
+        to: '@undo',
+      },
+    ],
+    onActivate: 'oldTitle=title;title="Endings"',
+    onDeactivate: 'title=oldTitle',
+    meta: 'endings',
     source: null,
   },
   'built-in/scene-editor': {

@@ -65,38 +65,32 @@
   color: rgba(255, 255, 255, 0.6);
   margin-top: 0;
 }
-.veditor textarea {
+textarea {
   width: 100%;
   resize: none;
 }
-.veditor textarea,
-.veditor input,
-.veditor button {
+textarea,
+input,
+button {
   background-color: #203f33;
   border: 1px solid #203f33;
   color: white;
   padding: 4px;
 }
-.veditor textarea:focus,
-.veditor input:focus,
-.veditor button:focus {
+textarea:focus,
+input:focus,
+button:focus {
   border: 1px solid #64ed98;
   outline: none;
 }
 
-.veditor button:hover {
+button:hover {
   background-color: #295242;
   border: 1px solid #295242;
 }
-.veditor button:active {
+button:active {
   background-color: #64ed98;
   border: 1px solid #64ed98;
-}
-.veditor a {
-  color: #64ed98;
-}
-.veditor a:not(:hover) {
-  text-decoration: none;
 }
 
 .veditor .checkbox {
@@ -208,4 +202,8 @@
 }
 .publish-overlay > span {
   margin-bottom: 20px;
+}
+
+::placeholder {
+  color: rgba(255, 255, 255, 0.5);
 }

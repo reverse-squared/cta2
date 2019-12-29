@@ -3,8 +3,8 @@ import { useState } from 'react';
 let isFetchingData = false;
 let cache: EndingList | null = null;
 
-type EndingList = EndingPartial[];
-interface EndingPartial {
+export type EndingList = EndingPartial[];
+export interface EndingPartial {
   id: string;
   title: string;
 }

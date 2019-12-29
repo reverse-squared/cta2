@@ -9,6 +9,7 @@ interface FancyTextProps {
   state: GameState;
   inline?: boolean;
   disableLinks?: boolean;
+  disableExpressions?: boolean;
 }
 
 interface FTMRules {
@@ -35,20 +36,20 @@ function mapFTMPart(part: FTMPart, index: number) {
   );
 }
 
-function FancyText({ text, state, inline, disableLinks }: FancyTextProps) {
-  if (text.startsWith('=')) {
+function FancyText({ text, state, inline, disableLinks, disableExpressions }: FancyTextProps) {
+  if (!disableExpressions && text.startsWith('=')) {
     text = String(state.eval(text.substr(1), `FancyTextExpression`));
   }
   if (text.startsWith('\\=')) {
     text.substr(2);
   }
-  text = text
-    .replace(/\\?\${([^}]+)}/g, (string, code) => {
+  if (!disableExpressions) {
+    text = text.replace(/\\?\${([^}]+)}/g, (string, code) => {
       if (string.startsWith('\\')) return string.substr(1);
       return String(state.eval(code, `FancyTextInlineExpression`));
-    })
-    .replace(/^\s+$/gm, '')
-    .replace(/\n\n+/, '\n\n');
+    });
+  }
+  text = text.replace(/^\s+$/gm, '').replace(/\n\n+/, '\n\n');
 
   const paragraphs: FTMPart[][] = [[]];
   let rules: FTMRules = {};

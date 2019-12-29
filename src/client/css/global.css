@@ -40,3 +40,10 @@ br,
 button {
   user-select: none;
 }
+
+.link {
+  color: #64ed98;
+}
+.link:not(:hover) {
+  text-decoration: none;
+}

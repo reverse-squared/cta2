@@ -8,6 +8,8 @@ function EndingProgress({}: EndingProgressProps) {
   const achieved = getAchievedEndingSet().size;
   const total = useEndingCount();
 
+  if (achieved === 0) return null;
+
   return achieved !== null && total !== null ? (
     total !== 0 ? (
       <>

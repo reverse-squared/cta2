@@ -76,6 +76,8 @@ export function createGameState(
     __internal_eventListener: new SimpleEmitter(),
     __internal_createErrorScene: createErrorSceneOnState,
     __internal_extraScenes: extraScenes,
+    __internal_hasAtLeastOneEnding: getAchievedEndingSet().size > 0,
+    __internal_PRODUCTION: process.env.PRODUCTION,
   };
   // bind
   state.reset = resetGameState.bind(state, startingScene);
@@ -124,6 +126,7 @@ const atLinks: StringObject<(state: GameState) => void> = {
     } else {
       const achieved = getAchievedEndingSet().size;
       state.setEndingAsAchieved(state.scene);
+      state.__internal_hasAtLeastOneEnding = true;
       if (achieved === 0) {
         state.reset('built-in/first-time-introduction');
       } else {
