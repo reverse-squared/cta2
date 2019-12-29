@@ -185,7 +185,10 @@ function Game({ state, extraScenes, sceneEditorId }: GameProps) {
           {scene.source !== null && (
             <p className={'source'}>
               {scene.type === 'scene' ? 'Scene' : 'Ending'} Contributed from{' '}
-              {formatSource(scene.source)}.
+              {formatSource(scene.source)}
+              {scene.type === 'ending'
+                ? ` - This scene has been viewed ${scene.views} times.`
+                : null}
             </p>
           )}
         </div>

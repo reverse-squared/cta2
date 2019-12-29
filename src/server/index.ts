@@ -7,6 +7,8 @@ import { initBot, postScene } from '../discord-bot/bot';
 import { getScene, getAllSources, getAllEndings } from './scene';
 import { connectToDatabase, runDb, ctaDb } from './database';
 import { validateScene } from '../shared/validateScene';
+import NodeCache from 'node-cache';
+import { Scene } from '../shared/types';
 
 // Connect to the database
 connectToDatabase();
@@ -14,11 +16,21 @@ connectToDatabase();
 // Start the Discord bot;
 initBot();
 
+// Create cache.
+const cache = new NodeCache({ stdTTL: 86400 });
+
 app.use(bodyParser.json());
 
 app.get('/api/scene/*', async (req, res) => {
   const sceneName = req.url.substr(11);
-  const scene = await getScene(req.url.substr(11));
+  const cachedScene = cache.get(sceneName);
+  let scene;
+
+  if (cachedScene) {
+    scene = cachedScene as Scene;
+  } else {
+    scene = (await getScene(req.url.substr(11))) as Scene;
+  }
 
   if (scene) {
     if (scene.type === 'ending') {
@@ -32,6 +44,8 @@ app.get('/api/scene/*', async (req, res) => {
     }
 
     res.send({ exists: true, scene });
+
+    cache.set(sceneName, scene);
   } else {
     res.send({ exists: false });
   }

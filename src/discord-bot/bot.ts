@@ -202,6 +202,18 @@ async function watchForVoting(request: SceneRequest) {
   }, request.ends - Date.now());
 }
 
+function cleanScene(scene: Scene): Scene {
+  let cleanedScene = scene;
+
+  // Remove empty options.
+
+  // Remvoe empty sources.
+
+  // Trim trailing whitespace.
+
+  return cleanedScene;
+}
+
 export async function postScene(id: string, scene: Scene, comment: string) {
   if (!botIsEnabled) {
     console.warn(
@@ -211,16 +223,18 @@ export async function postScene(id: string, scene: Scene, comment: string) {
     return;
   }
 
+  const cleanedScene = cleanScene(scene);
+
   const now = Date.now();
 
-  const embed = getDiscordEmbed(id, scene, now, 'open');
+  const embed = getDiscordEmbed(id, cleanedScene, now, 'open');
 
   const message = (await votingChannel.send({ embed: embed })) as Discord.Message;
 
   await message.react('👍');
   await message.react('👎');
 
-  const request = await createRequestInDb(id, scene, message.id, now);
+  const request = await createRequestInDb(id, cleanedScene, message.id, now);
 
   watchForVoting(request);
 
