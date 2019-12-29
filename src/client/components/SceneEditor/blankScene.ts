@@ -6,15 +6,13 @@ export const blankScene = JSON.stringify(
       {
         label: 'Pick it up.',
         to: 'pennyPickup',
-        isVisible: 'isPennyOnGround',
       },
       {
         label: 'Leave it.',
         to: 'work',
       },
     ],
-    onFirstActivate: 'isPennyOnGround = true',
-    source: 'yourself',
+    source: 'Anonymous',
   },
   null,
   2

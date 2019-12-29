@@ -37,7 +37,6 @@ export function initBot() {
         watchForVoting(request);
       });
 
-      // TODO: Make this a fancy.
       console.log('[Bot] Bot ready.');
     });
   }
@@ -125,7 +124,6 @@ async function deleteRequetsOfLikeId(id: string) {
 async function watchForVoting(request: SceneRequest) {
   const message = await votingChannel.fetchMessage(request.discordMessageId);
   if (!message) {
-    // todo: log and delete the request
     throw new Error('Message does not exist.');
   }
 

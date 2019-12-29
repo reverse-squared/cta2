@@ -74,14 +74,15 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
     [scene, updateScene]
   );
 
-  const sources: { name: string; desc?: string }[] =
-    scene.source === null
+  const sources: { name: string; desc?: string }[] = scene
+    ? scene.source === null
       ? []
       : typeof scene.source === 'string'
       ? [{ name: scene.source }]
       : Array.isArray(scene.source)
       ? scene.source.map((source) => (typeof source === 'string' ? { name: source } : source))
-      : [scene.source];
+      : [scene.source]
+    : [];
 
   function handleAddAnotherOption() {
     if (scene.type === 'scene') {
@@ -234,12 +235,14 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
 
   if (!scene) {
     return (
-      <div>
-        <h1>Error in Scene Formatting</h1>
-        <pre>{error.stack || error}</pre>
-        <a href='#' onClick={reset}>
-          Reset your scene (Discards information)
-        </a>
+      <div className='veditor-scroll'>
+        <div className='veditor'>
+          <h1>Error in Scene Formatting</h1>
+          <pre className='ftm-blockCode'>{error.message || error}</pre>
+          <a href='#' onClick={reset}>
+            Reset your scene (Discards information)
+          </a>
+        </div>
       </div>
     );
   }
@@ -352,7 +355,8 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
         <h2>Custom CSS</h2>
         <p className='helper-text'>
           Add custom styling to this scene with CSS. See the{' '}
-          <a href='/todo_docs_css'>documentation</a> on how to select elements from the scene.
+          <a href='https://reverse-squared.github.io/cta2/#/ftm'>documentation</a> on how to select
+          elements from the scene.
         </p>
         <textarea
           value={scene.css}

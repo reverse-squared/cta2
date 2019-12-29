@@ -98,14 +98,6 @@ const cta2BuiltInScenes: StringObject<Scene> = {
       'startingFlightTimeLeft=startingFlightTimeLeft-1;(startingFlightTimeLeft<=0)?(goToScene("plane_gettingOff")):0',
     source: 'Dave Caruso',
   },
-  'cta2/plane_tryToSleep': {
-    type: 'ending',
-    passage: `The coma people don't know what te fuck le happen.`,
-    title: 'Coma',
-    description: 'Fall in a coma',
-    source: 'Dave Caruso',
-    views: 0,
-  },
 };
 
 export default cta2BuiltInScenes;
