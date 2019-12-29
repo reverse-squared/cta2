@@ -13,6 +13,9 @@
   color: #64ed98;
   list-style: square;
 }
+.option-white {
+  color: white;
+}
 
 .optionLink {
   color: inherit;

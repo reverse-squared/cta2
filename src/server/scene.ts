@@ -76,7 +76,7 @@ export async function createScene(id: string, scene: Scene) {
   await runDb(
     ctaDb()
       .table('scenes')
-      .insert({ id: id, scene: scene })
+      .insert({ id: id, type: scene.type, scene: scene })
   );
 
   const sources: { name: string; desc?: string }[] =
@@ -87,13 +87,43 @@ export async function createScene(id: string, scene: Scene) {
       : Array.isArray(scene.source)
       ? scene.source.map((source) => (typeof source === 'string' ? { name: source } : source))
       : [scene.source];
+
   await Promise.all(
     sources.map((source) =>
       runDb(
         ctaDb()
           .table('sources')
-          .replace({ name: source.name })
+          .insert(
+            { id: source.name.toLowerCase().replace(/\W/g, ''), name: source.name },
+            { conflict: 'replace' }
+          )
       )
     )
   );
+}
+
+export async function getAllEndings() {
+  const allEndings = await runDb(
+    ctaDb()
+      .table('scenes')
+      .getAll('ending', { index: 'type' })
+      .coerceTo('array')
+  );
+
+  return allEndings.map((ending) => {
+    return {
+      id: ending.id,
+      title: ending.scene.title,
+    };
+  });
+}
+
+export async function getAllSources() {
+  const allSources = await runDb(
+    ctaDb()
+      .table('sources')
+      .coerceTo('array')
+  );
+
+  return allSources;
 }

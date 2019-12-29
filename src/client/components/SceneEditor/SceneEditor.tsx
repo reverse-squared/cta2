@@ -1,30 +1,55 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import { validateScene } from '../../../shared/validateScene';
 import { createErrorScene, builtInScenes } from '../../built-in-scenes';
 import Game from '../Game';
 import RawEditor from './RawEditor';
 import VisualEditor from './VisualEditor';
+import MetadataEditor from './MetadataEditor';
 import { Scene } from '../../../shared/types';
 import { GameState, createGameState } from '../../gameState';
 import { blankScene } from './blankScene';
+import { ScaleLoader } from 'react-spinners';
 import '../../css/editor.css';
 
 export interface SceneEditorProps {
   state: GameState;
 }
 
+interface SceneMetadata {
+  sceneEditorId: string;
+  comment: string;
+  publish: boolean;
+}
+
 export interface SceneEditorEditorProps {
   code: string;
   onCodeChange: (code: string) => void;
+  meta: SceneMetadata;
+  onMetaChange: (meta: SceneMetadata) => void;
 }
 
-type EditorTypes = 'raw' | 'visual';
+type EditorTypes = 'raw' | 'visual' | 'meta';
 
 const editors = {
   raw: RawEditor,
   visual: VisualEditor,
+  meta: MetadataEditor,
 };
+
+async function postData(url = '', data = {}) {
+  // Default options are marked with *
+  const response = await fetch(url, {
+    method: 'POST',
+    cache: 'no-cache',
+    credentials: 'same-origin',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data), // body data type must match "Content-Type" header
+  });
+  return await response.json();
+}
 
 function SceneEditor({ state }: SceneEditorProps) {
   const [, setRenderNumber] = useState(0);
@@ -34,16 +59,21 @@ function SceneEditor({ state }: SceneEditorProps) {
   const [editor, setEditor] = useState<EditorTypes>('visual');
   const [code, setCode] = useState(blankScene);
 
+  const [comments, setComments] = useState('');
+
   const setEditorTo = {
     visual: useCallback(() => setEditor('visual'), []),
     raw: useCallback(() => setEditor('raw'), []),
+    meta: useCallback(() => setEditor('meta'), []),
   };
 
   let previewedScene: Scene;
+  let parseError = false;
   try {
     previewedScene = validateScene(JSON.parse(code));
   } catch (error) {
     previewedScene = createErrorScene(sceneEditorId, error);
+    parseError = true;
   }
 
   const passedState = useMemo(
@@ -79,6 +109,30 @@ function SceneEditor({ state }: SceneEditorProps) {
     };
   }, [passedState]);
 
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isDonePublishing, setIsDonePublishing] = useState(false);
+  const onMetaChange = useCallback(
+    (meta: SceneMetadata) => {
+      setComments(meta.comment);
+      if (meta.publish && !parseError) {
+        // start publish
+        setIsPublishing(true);
+        postData('/api/request', {
+          id: sceneEditorId,
+          scene: previewedScene,
+          comment: comments,
+        }).then(() => {
+          setIsDonePublishing(true);
+        });
+      }
+    },
+    [parseError, comments, code, sceneEditorId]
+  );
+
+  const goToMainMenu = useCallback(() => {
+    state.reset();
+  }, []);
+
   if (width < 1145) {
     return (
       <>
@@ -108,6 +162,13 @@ function SceneEditor({ state }: SceneEditorProps) {
           >
             Visual Editor
           </button>
+          <div style={{ flex: 1 }} />
+          <button
+            className={clsx('editor-switch-button', editor === 'meta' && 'current')}
+            onClick={setEditorTo.meta}
+          >
+            Finish and Publish
+          </button>
         </div>
         <div
           style={{
@@ -119,7 +180,12 @@ function SceneEditor({ state }: SceneEditorProps) {
             bottom: '0',
           }}
         >
-          <Editor onCodeChange={setCode} code={code} />
+          <Editor
+            onCodeChange={setCode}
+            code={code}
+            meta={{ sceneEditorId, comment: comments, publish: false }}
+            onMetaChange={onMetaChange}
+          />
         </div>
       </div>
       <div className='editorPreview'>
@@ -138,6 +204,38 @@ function SceneEditor({ state }: SceneEditorProps) {
           sceneEditorId={sceneEditorId}
         />
       </div>
+      {isPublishing && (
+        <div className='publish-overlay'>
+          {!isDonePublishing ? (
+            <>
+              <span>Publishing...</span> <ScaleLoader width={8} height={60} color='white' />
+            </>
+          ) : (
+            <>
+              <span>Requested</span>{' '}
+              <span style={{ fontSize: '20px' }}>
+                Join the{' '}
+                <span className='option'>
+                  <a className='optionLink' href='https://discord.gg/ABwjpk4'>
+                    Discord Server
+                  </a>
+                </span>{' '}
+                to vote and discuss on the scene.
+                <br />
+              </span>
+              <span style={{ fontSize: '20px' }}>
+                Go back to the{' '}
+                <span className='option'>
+                  <a className='optionLink' href='#' onClick={goToMainMenu}>
+                    Main Menu
+                  </a>
+                </span>
+                .
+              </span>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -36,7 +36,7 @@ export async function connectToDatabase() {
 
   await createTable('scenes', {}, ['type']);
   await createTable('requests', { primary_key: 'uuid' }, ['id']);
-  await createTable('sources', { primary_key: 'name' }, []);
+  await createTable('sources', { primary_key: 'id' }, []);
 }
 
 export function ctaDb() {
@@ -47,20 +47,4 @@ export async function runDb<T>(operation: Operation<T>): Promise<T> {
     throw new Error('Connection not established. Please Wait.');
   }
   return operation.run(connection);
-}
-
-export async function getAllEndings() {
-  const allEndings = await runDb(
-    ctaDb()
-      .table('scenes')
-      .getAll('ending', { index: 'type' })
-      .coerceTo('array')
-  );
-
-  return allEndings.map((ending) => {
-    return {
-      id: ending.id,
-      title: ending.scene.title,
-    };
-  });
 }

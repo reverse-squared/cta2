@@ -200,7 +200,7 @@ async function watchForVoting(request: SceneRequest) {
   }, request.ends - Date.now());
 }
 
-export async function postScene(id: string, scene: Scene) {
+export async function postScene(id: string, scene: Scene, comment: string) {
   if (!botIsEnabled) {
     console.warn(
       'WARNING: The discord bot is not enabled. Scene ' + id + ' was added without voting.'
@@ -221,4 +221,6 @@ export async function postScene(id: string, scene: Scene) {
   const request = await createRequestInDb(id, scene, message.id, now);
 
   watchForVoting(request);
+
+  // todo: log the comment
 }

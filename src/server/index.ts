@@ -2,16 +2,19 @@ import { app } from 'fullstack-system';
 import r from 'rethinkdb';
 import fs from 'fs-extra';
 import path from 'path';
-
-import { initBot } from '../discord-bot/bot';
-import { getScene } from './scene';
-import { connectToDatabase, runDb, ctaDb, getAllEndings } from './database';
+import bodyParser from 'body-parser';
+import { initBot, postScene } from '../discord-bot/bot';
+import { getScene, getAllSources, getAllEndings } from './scene';
+import { connectToDatabase, runDb, ctaDb } from './database';
+import { validateScene } from '../shared/validateScene';
 
 // Connect to the database
 connectToDatabase();
 
 // Start the Discord bot;
 initBot();
+
+app.use(bodyParser.json());
 
 app.get('/api/scene/*', async (req, res) => {
   const sceneName = req.url.substr(11);
@@ -36,4 +39,29 @@ app.get('/api/scene/*', async (req, res) => {
 
 app.get('/api/endings', async (req, res) => {
   res.send(await getAllEndings());
+});
+app.get('/api/sources', async (req, res) => {
+  res.send(await getAllSources());
+});
+
+app.post('/api/request', async (req, res) => {
+  try {
+    if (!req.body) {
+      throw new Error();
+    }
+    if (typeof req.body !== 'object') {
+      throw new Error();
+    }
+    if (typeof req.body.id !== 'string') {
+      throw new Error();
+    }
+    if (typeof req.body.comment !== 'string') {
+      throw new Error();
+    }
+    validateScene(req.body.scene);
+    postScene(req.body.id, req.body.scene, req.body.comment);
+    res.send({ error: false });
+  } catch (error) {
+    res.send({ error: true });
+  }
 });

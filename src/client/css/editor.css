@@ -191,3 +191,21 @@
   background-color: #64ed98;
   color: black;
 }
+
+.publish-overlay {
+  background-color: rgba(0, 0, 0, 0.7);
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  font-size: 48px;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.publish-overlay > span {
+  margin-bottom: 20px;
+}

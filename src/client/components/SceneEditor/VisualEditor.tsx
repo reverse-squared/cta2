@@ -266,21 +266,19 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
         </div>
 
         <h2>Scene Passage</h2>
-        <div>
-          <textarea
-            value={scene.passage}
-            onChange={onPassageUpdate}
-            rows={(() => {
-              const x = scene.passage.match(/.{61}|.{0,61}(\n|$)/g);
-              return Math.max((x || []).length, 4);
-            })()}
-            cols={50}
-          />
-        </div>
         <p className='helper-text'>
           A small paragraph or two about what's happening in the story in this scene. Displayed at
           the top of the screen.
         </p>
+        <textarea
+          value={scene.passage}
+          onChange={onPassageUpdate}
+          rows={(() => {
+            const x = scene.passage.match(/.{61}|.{0,61}(\n|$)/g);
+            return Math.max((x || []).length, 4);
+          })()}
+          cols={50}
+        />
 
         {scene.type === 'scene' ? (
           <>
@@ -370,7 +368,7 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
           This is where you write who created this scene. It is displayed at the bottom in smaller
           print for everyone to see. You can add a person's role if multiple people collaborated on
           a single scene, such as if someone had the original idea, but someone else actually wrote
-          or implemented the scene.
+          or implemented the scene. All sources will be automatically added to the credits.
         </p>
         {sources.map((source: { name: string; desc?: string }, index: number) => {
           return (
