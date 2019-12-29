@@ -206,6 +206,11 @@ function cleanScene(scene: Scene): Scene {
   let cleanedScene = scene;
 
   // Remove empty options.
+  if (scene.type === 'scene') {
+    scene.options = scene.options.filter((option) => {
+      return option === 'separator' || (option.label && option.to);
+    });
+  }
 
   // Remvoe empty sources.
 

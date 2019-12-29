@@ -61,7 +61,17 @@ function MetadataEditor({ code, onCodeChange, meta, onMetaChange }: SceneEditorE
         <br />
 
         <h2>Publish Suggestion</h2>
-        <p className='helper-text'>make sure you follow contributing rules</p>
+        <p className='helper-text'>Make sure you abide by the contributing rules:</p>
+        <ol>
+          <li className='helper-text'>Do not include periods at the end of scene options.</li>
+          <li className='helper-text'>Do not include racial slurs anywhere in your scene.</li>
+          <li className='helper-text'>Do not include spoilers to any TV shows or movies.</li>
+          <li className='helper-text'>
+            Do not include personal information (e.g. emails, addresses, IP addresses, etc...) of
+            you or others.
+          </li>
+          <li className='helper-text'>Please try not to make so many "You Died" endings.</li>
+        </ol>
         <br />
         <p className='helper-text'>
           When you are ready, press the giant button to send it into voting.

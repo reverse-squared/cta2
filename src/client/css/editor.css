@@ -41,9 +41,14 @@
 }
 
 .veditor-warning {
+  margin: 25px 0px;
+
   color: red;
   font-size: 14px;
-  margin-bottom: 50px;
+
+  background-color: #381c1c;
+  border: 5px solid #ff1616;
+  padding: 10px;
 }
 
 .veditor-scroll {

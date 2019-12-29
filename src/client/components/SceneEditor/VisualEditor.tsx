@@ -7,6 +7,7 @@ import { SceneEditorEditorProps } from './SceneEditor';
 import { blankScene } from './blankScene';
 
 let mirror: Scene = null as any;
+let betaDismissed = false;
 
 function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
   const reset = useCallback(() => {
@@ -232,6 +233,9 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
       updateScene(scene);
     }
   }
+  function handleBetaDismiss() {
+    betaDismissed = true;
+  }
 
   if (!scene) {
     return (
@@ -250,12 +254,18 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
   return (
     <div className='veditor-scroll'>
       <div className='veditor'>
-        <p className='veditor-warning'>
-          [NOTICE]: the visual editor is a work in progress in beta. It is also missing some
-          features such as adding custom logic. For that you can use the Raw Editor.
-        </p>
+        {!betaDismissed ? (
+          <div className='veditor-warning'>
+            <h2 style={{ margin: '0' }}>Notice</h2>
+            <strong>The visual editor is a work in progress</strong> in beta. It is also missing
+            some features such as adding custom logic. For that you can use the Raw Editor.
+            <button style={{ marginTop: '5px' }} onClick={handleBetaDismiss}>
+              Dismiss
+            </button>
+          </div>
+        ) : null}
 
-        <div>
+        <div style={{ marginTop: '15px' }}>
           <label className='checkbox' htmlFor='is_ending'>
             <input
               id='is_ending'

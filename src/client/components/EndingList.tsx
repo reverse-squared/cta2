@@ -71,7 +71,7 @@ function EndingList({ state }: EndingListProps) {
   });
 
   const filteredData = sortedData.filter((ending) =>
-    filter.trim() === '' ? true : ending.title.includes(filter.trim())
+    filter.trim() === '' ? true : ending.title.toLowerCase().includes(filter.trim().toLowerCase())
   );
 
   const achievedEndings = sortedData.filter((x) => achievedEndingsSet.has(x.id));
