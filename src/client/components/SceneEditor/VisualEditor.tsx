@@ -1,66 +1,122 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { moveIndex } from '@reverse/array';
 import { validateScene } from '../../../shared/validateScene';
-import { Scene } from '../../../shared/types';
+import { Scene, Option, Source } from '../../../shared/types';
 import { InputChangeEvent, TextareaChangeEvent } from '../../type-shorthand';
 import { SceneEditorEditorProps } from './SceneEditor';
 import { blankScene } from './blankScene';
 
-let mirror: Scene = null as any;
 let betaDismissed = false;
 
+function isNotBlank(string: string) {
+  return !string.match(/^[\s\n]*$/);
+}
+
+function minifySource(source: Source | Source[] | null): Source | Source[] | null {
+  if (source === null) {
+    return null;
+  } else if (typeof source === 'string') {
+    return source;
+  } else if (Array.isArray(source)) {
+    if (source.length === 1) {
+      return minifySource(source[0]);
+    }
+    return source.map((src) => {
+      return minifySource(src) as any;
+    });
+  } else {
+    if (isNotBlank(source.desc || '')) {
+      return { name: source.name, desc: source.desc };
+    } else {
+      return source.name;
+    }
+  }
+}
+
 function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
+  const [resetFlag, setResetFlag] = useState(0);
   const reset = useCallback(() => {
     onCodeChange(blankScene);
+    setResetFlag((x) => x + 1);
   }, []);
-
-  let scene: Scene;
-  let error: any;
-  try {
-    scene = validateScene(JSON.parse(code));
-  } catch (e) {
-    error = e;
-    scene = null as any;
-  }
+  const [scene, error] = useMemo(() => {
+    let scene: Scene;
+    let error: any;
+    try {
+      scene = validateScene(JSON.parse(code));
+    } catch (e) {
+      error = e;
+      scene = null as any;
+    }
+    scene.source = scene
+      ? scene.source === null
+        ? []
+        : typeof scene.source === 'string'
+        ? [{ name: scene.source }]
+        : Array.isArray(scene.source)
+        ? scene.source.map((source) => (typeof source === 'string' ? { name: source } : source))
+        : [scene.source]
+      : [];
+    return [scene, error];
+  }, [resetFlag]);
 
   const updateScene = useCallback(
     (scene: Scene) => {
-      onCodeChange(JSON.stringify(scene, null, 2));
+      let obj: Scene = {} as Scene;
+
+      obj.type = scene.type;
+      obj.passage = scene.passage;
+
+      if (obj.type === 'scene' && scene.type === 'scene') {
+        obj.options = scene.options.map((option: Option) => {
+          if (option === 'separator') return 'separator';
+
+          const obj: Option = {
+            label: option.label,
+          };
+
+          if (option.to && isNotBlank(option.to)) obj.to = option.to;
+          if (option.onActivate && isNotBlank(option.onActivate))
+            obj.onActivate = option.onActivate;
+
+          return obj;
+        });
+
+        if (scene.onActivate && isNotBlank(scene.onActivate)) obj.onActivate = scene.onActivate;
+        if (scene.onDeactivate && isNotBlank(scene.onDeactivate))
+          obj.onDeactivate = scene.onDeactivate;
+        if (scene.onFirstActivate && isNotBlank(scene.onFirstActivate))
+          obj.onFirstActivate = scene.onFirstActivate;
+        if (scene.onFirstDeactivate && isNotBlank(scene.onFirstDeactivate))
+          obj.onFirstDeactivate = scene.onFirstDeactivate;
+      }
+      if (obj.type === 'ending' && scene.type === 'ending') {
+        obj.title = scene.title;
+        obj.description = scene.description;
+      }
+
+      obj.css = scene.css;
+
+      obj.source = minifySource(scene.source);
+
+      onCodeChange(JSON.stringify(obj, null, 2));
     },
     [onCodeChange]
   );
 
+  const sources = scene.source as { name: string; desc?: string }[];
+
   // handlers for stuff
   const onTypeUpdate = useCallback(
     (ev: InputChangeEvent) => {
-      scene.type = ev.currentTarget.checked ? 'scene' : 'ending';
+      scene.type = ev.currentTarget.checked ? 'ending' : 'scene';
 
-      if (!mirror) {
-        mirror = { ...scene };
-
-        if (mirror.type === 'scene') {
-          delete mirror.options;
-          delete mirror.preloadScenes;
-          delete mirror.onFirstActivate;
-          delete mirror.onFirstDeactivate;
-          delete mirror.onActivate;
-          delete mirror.onDeactivate;
-        } else {
-          delete mirror.title;
-          delete mirror.description;
-        }
-
-        mirror.type = mirror.type === 'ending' ? 'scene' : 'ending';
-
-        if (mirror.type === 'scene') {
-          mirror.options = [];
-        } else {
-          mirror.title = '';
-          mirror.description = '';
-        }
+      if (scene.type === 'scene') {
+        scene.options = [];
+      } else {
+        scene.title = '';
+        scene.description = '';
       }
-
-      [scene, mirror] = [mirror, scene];
 
       updateScene(scene);
     },
@@ -74,16 +130,6 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
     },
     [scene, updateScene]
   );
-
-  const sources: { name: string; desc?: string }[] = scene
-    ? scene.source === null
-      ? []
-      : typeof scene.source === 'string'
-      ? [{ name: scene.source }]
-      : Array.isArray(scene.source)
-      ? scene.source.map((source) => (typeof source === 'string' ? { name: source } : source))
-      : [scene.source]
-    : [];
 
   function handleAddAnotherOption() {
     if (scene.type === 'scene') {
@@ -138,26 +184,6 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
   function handleCssChange(ev: TextareaChangeEvent) {
     scene.css = ev.currentTarget.value;
     updateScene(scene);
-  }
-  function handleOnActivateChange(ev: TextareaChangeEvent) {
-    scene.onActivate = ev.currentTarget.value;
-    updateScene(scene);
-  }
-  function handleOnFirstActivateChange(ev: TextareaChangeEvent) {
-    scene.onFirstActivate = ev.currentTarget.value;
-    updateScene(scene);
-  }
-  function handleOnDeactivateChange(ev: TextareaChangeEvent) {
-    if (scene.type === 'scene') {
-      scene.onDeactivate = ev.currentTarget.value;
-      updateScene(scene);
-    }
-  }
-  function handleOnFirstDeactivateChange(ev: TextareaChangeEvent) {
-    if (scene.type === 'scene') {
-      scene.onFirstDeactivate = ev.currentTarget.value;
-      updateScene(scene);
-    }
   }
   function handleAddSource() {
     sources.push({
@@ -390,12 +416,12 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
           return (
             <div key={index}>
               <input
-                value={source.name}
+                value={source.name || ''}
                 onChange={(event) => handleSourceNameChange(index, event)}
                 placeholder='Name'
               />
               <input
-                value={source.desc}
+                value={source.desc || ''}
                 onChange={(event) => handleSourceDescriptionChange(index, event)}
                 placeholder='Role (Optional)'
               />
