@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import clsx from 'clsx';
 import { Scene } from '../../shared/types';
 import FancyText from './FancyText';
@@ -12,6 +12,7 @@ import CTAInspector from './Inspector';
 import EndingProgress from './EndingProgress';
 import EndingList from './EndingList';
 import { formatSource } from '../../shared/utils/formatSource';
+import { analyticsSceneView, analyticsEndingView } from '../analytics';
 
 export interface GameProps {
   state: GameState;
@@ -77,6 +78,15 @@ function Game({ state, extraScenes, sceneEditorId }: GameProps) {
       setVisible(false);
     };
   }, [state]);
+
+  useMemo(() => {
+    if (scene) {
+      analyticsSceneView(state.scene);
+      if (scene.type === 'ending') {
+        analyticsEndingView(state.scene);
+      }
+    }
+  }, [scene]);
 
   if (scene === null) {
     return (

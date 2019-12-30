@@ -10,7 +10,7 @@ import {
 } from './ending';
 import { SimpleEmitter } from '@reverse/emitter';
 import { getSceneData } from './scene-data';
-import { builtInScenes, createErrorScene } from './built-in-scenes';
+import { builtInScenes } from './built-in-scenes';
 import { Scene } from '../shared/types';
 
 const parser = new Parser();

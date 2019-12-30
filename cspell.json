@@ -1,5 +1,6 @@
 {
   "words": [
+    "parcells",
     "clsx",
     "rerender",
     "scrollbar",
@@ -10,6 +11,6 @@
     "mkdirs",
     "mkdirp",
     "veditor",
-    "parcells"
+    "pageview"
   ]
 }

@@ -14,6 +14,7 @@ import { ScaleLoader } from 'react-spinners';
 import '../../css/editor.css';
 import { getSceneData } from '../../scene-data';
 import { getLoginToken } from '../../developer-mode';
+import { analyticsSubmit } from '../../analytics';
 
 export interface SceneEditorProps {
   state: GameState;
@@ -129,6 +130,9 @@ function SceneEditor({ state }: SceneEditorProps) {
       if (meta.publish && !parseError) {
         // start publish
         setIsPublishing(true);
+        if (state.sceneEditorIsEditing) {
+          analyticsSubmit(sceneEditorId);
+        }
         postData('/api/request', {
           id: sceneEditorId,
           scene: previewedScene,
