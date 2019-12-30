@@ -164,6 +164,9 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
       name: '',
       desc: '',
     });
+
+    scene.source = sources;
+
     updateScene(scene);
   }
   function handleSourceNameChange(index: number, ev: React.ChangeEvent<HTMLInputElement>) {
