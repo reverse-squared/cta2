@@ -90,19 +90,19 @@ const allowedSceneNames = [/cta2\/.*/];
 app.post('/api/request', async (req, res) => {
   try {
     if (!req.body) {
-      throw new Error();
+      throw new Error('no body');
     }
     if (typeof req.body !== 'object') {
-      throw new Error();
+      throw new Error('not obj');
     }
     if (typeof req.body.id !== 'string') {
-      throw new Error();
+      throw new Error('no id');
     }
     if (!allowedSceneNames.some((x) => x.exec(req.body.id))) {
-      throw new Error();
+      throw new Error('scene name banned');
     }
     if (typeof req.body.comment !== 'string') {
-      throw new Error();
+      throw new Error('comment not a string');
     }
     validateScene(req.body.scene);
     if (req.body.isEditing) {
@@ -110,16 +110,17 @@ app.post('/api/request', async (req, res) => {
         createScene(req.body.id, req.body.scene, true);
         res.send({ error: false });
       } else {
-        throw new Error();
+        throw new Error('incorrect developer information');
       }
       return;
     }
-    if (sceneExists(req.body.id)) {
-      throw new Error();
+    if (await sceneExists(req.body.id)) {
+      throw new Error('scene exists');
     }
     postScene(req.body.id, req.body.scene, req.body.comment);
     res.send({ error: false });
   } catch (error) {
-    res.send({ error: true });
+    console.log(error);
+    res.send({ error: error.message });
   }
 });

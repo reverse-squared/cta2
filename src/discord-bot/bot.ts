@@ -45,7 +45,7 @@ export function initBot() {
   }
 }
 
-async function getDiscordEmbed(
+function getDiscordEmbed(
   id: string,
   scene: Scene,
   time: number,
@@ -97,9 +97,9 @@ async function getDiscordEmbed(
           fields: [
             {
               name: scene.title,
-              value: scene.description
-            }
-          ]
+              value: scene.description,
+            },
+          ],
         };
 
   return {

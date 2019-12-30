@@ -130,7 +130,7 @@ function SceneEditor({ state }: SceneEditorProps) {
       if (meta.publish && !parseError) {
         // start publish
         setIsPublishing(true);
-        if (state.sceneEditorIsEditing) {
+        if (!state.sceneEditorIsEditing) {
           analyticsSubmit(sceneEditorId);
         }
         postData('/api/request', {

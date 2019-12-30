@@ -17,6 +17,7 @@ Object.defineProperty(window, 'I_AM_DEVELOPER', {
       state.__internal_PRODUCTION = false;
       state.__internal_developer = true;
       state.__internal_eventListener.emit();
+      (window as any).state = state;
     }
   },
 });
@@ -24,6 +25,7 @@ Object.defineProperty(window, 'I_AM_DEVELOPER', {
 if (isDeveloperMode()) {
   state.__internal_PRODUCTION = false;
   state.__internal_developer = true;
+  (window as any).state = state;
 }
 
 function App() {
