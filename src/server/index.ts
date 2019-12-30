@@ -16,14 +16,15 @@ connectToDatabase();
 // Start the Discord bot;
 initBot();
 
-// Create cache.
-const cache = new NodeCache({ stdTTL: 86400 });
+// Create caches.
+const sceneCache = new NodeCache({ stdTTL: 86400 });
+const otherCache = new NodeCache({ stdTTL: 240 });
 
 app.use(bodyParser.json());
 
 app.get('/api/scene/*', async (req, res) => {
   const sceneName = req.url.substr(11);
-  const cachedScene = cache.get(sceneName);
+  const cachedScene = sceneCache.get(sceneName);
   let scene;
 
   if (cachedScene) {
@@ -45,17 +46,31 @@ app.get('/api/scene/*', async (req, res) => {
 
     res.send({ exists: true, scene });
 
-    cache.set(sceneName, scene);
+    sceneCache.set(sceneName, scene);
   } else {
     res.send({ exists: false });
   }
 });
 
 app.get('/api/endings', async (req, res) => {
-  res.send(await getAllEndings());
+  const cached = otherCache.get('endings');
+  if (cached) {
+    res.send(cached);
+  } else {
+    const data = await getAllEndings();
+    res.send(data);
+    otherCache.set('endings', data);
+  }
 });
 app.get('/api/sources', async (req, res) => {
-  res.send(await getAllSources());
+  const cached = otherCache.get('sources');
+  if (cached) {
+    res.send(cached);
+  } else {
+    const data = await getAllSources();
+    res.send(data);
+    otherCache.set('sources', data);
+  }
 });
 
 app.post('/api/request', async (req, res) => {
