@@ -84,6 +84,9 @@ app.get('/api/sources', async (req, res) => {
   }
 });
 
+// scene names are allowed for only the story
+const allowedSceneNames = [/cta2\/.*/];
+
 app.post('/api/request', async (req, res) => {
   try {
     if (!req.body) {
@@ -93,6 +96,9 @@ app.post('/api/request', async (req, res) => {
       throw new Error();
     }
     if (typeof req.body.id !== 'string') {
+      throw new Error();
+    }
+    if (!allowedSceneNames.some((x) => x.exec(req.body.id))) {
       throw new Error();
     }
     if (typeof req.body.comment !== 'string') {
