@@ -30,6 +30,7 @@ export async function fetchSceneData(id: string): Promise<Scene | null> {
     .catch((error) => {
       sceneCache[id] = createErrorScene(id, error);
     });
+
   requests.delete(id);
   return sceneCache[id];
 }
@@ -40,7 +41,7 @@ export function useSceneData(id: string, extraScenes?: StringObject<Scene>): Sce
   if (extraScenes && extraScenes[id]) return extraScenes[id];
 
   if (!(id in sceneCache) && !requests.has(id)) {
-    fetchSceneData(id).then(() => rerender(1));
+    fetchSceneData(id).then(() => rerender(Math.random()));
   }
 
   return sceneCache[id] || null;
