@@ -15,6 +15,7 @@ const EMBED_COLOR = 0x64ed98;
 let bot: Discord.Client;
 let votingChannel: Discord.TextChannel;
 let archiveChannel: Discord.TextChannel;
+let commentChannel: Discord.TextChannel;
 
 const botIsEnabled = env.bot.token && env.bot.votingChannel;
 
@@ -33,6 +34,7 @@ export function initBot() {
 
       votingChannel = guild.channels.get(env.bot.votingChannel) as Discord.TextChannel;
       archiveChannel = guild.channels.get(env.bot.archiveChannel) as Discord.TextChannel;
+      commentChannel = guild.channels.get(env.bot.commentChannel) as Discord.TextChannel;
 
       (await getAllRequests()).forEach((request) => {
         watchForVoting(request);
@@ -262,5 +264,9 @@ export async function postScene(id: string, scene: Scene, comment: string) {
 
   watchForVoting(request);
 
-  // todo: log the comment
+  if (comment.trim() !== '') {
+    commentChannel.send(
+      `Comment for scene request \`${id}\`: \`\`\`${comment.replace(/`/g, '`\u2063')}\`\`\``
+    );
+  }
 }

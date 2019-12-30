@@ -4,6 +4,7 @@ export interface Env {
     homeGuild: string;
     votingChannel: string;
     archiveChannel: string;
+    commentChannel: string;
     moderatorRoleId: string;
   };
   googleAnalyticsID: string | null;
