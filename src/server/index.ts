@@ -4,11 +4,12 @@ import fs from 'fs-extra';
 import path from 'path';
 import bodyParser from 'body-parser';
 import { initBot, postScene } from '../discord-bot/bot';
-import { getScene, getAllSources, getAllEndings } from './scene';
+import { getScene, getAllSources, getAllEndings, sceneExists, createScene } from './scene';
 import { connectToDatabase, runDb, ctaDb } from './database';
 import { validateScene } from '../shared/validateScene';
 import NodeCache from 'node-cache';
 import { Scene } from '../shared/types';
+import env from '../shared/env';
 
 // Connect to the database
 connectToDatabase();
@@ -88,6 +89,18 @@ app.post('/api/request', async (req, res) => {
       throw new Error();
     }
     validateScene(req.body.scene);
+    if (req.body.isEditing) {
+      if (req.body.developerToken === env.developerPassword) {
+        createScene(req.body.id, req.body.scene, true);
+        res.send({ error: false });
+      } else {
+        throw new Error();
+      }
+      return;
+    }
+    if (sceneExists(req.body.id)) {
+      throw new Error();
+    }
     postScene(req.body.id, req.body.scene, req.body.comment);
     res.send({ error: false });
   } catch (error) {

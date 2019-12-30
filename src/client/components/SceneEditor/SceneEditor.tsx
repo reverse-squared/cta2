@@ -6,11 +6,14 @@ import Game from '../Game';
 import RawEditor from './RawEditor';
 import VisualEditor from './VisualEditor';
 import MetadataEditor from './MetadataEditor';
+import DeveloperEditor from './DeveloperEditor';
 import { Scene } from '../../../shared/types';
 import { GameState, createGameState } from '../../gameState';
 import { blankScene } from './blankScene';
 import { ScaleLoader } from 'react-spinners';
 import '../../css/editor.css';
+import { getSceneData } from '../../scene-data';
+import { getLoginToken } from '../../developer-mode';
 
 export interface SceneEditorProps {
   state: GameState;
@@ -29,12 +32,13 @@ export interface SceneEditorEditorProps {
   onMetaChange: (meta: SceneMetadata) => void;
 }
 
-type EditorTypes = 'raw' | 'visual' | 'meta';
+type EditorTypes = 'raw' | 'visual' | 'meta' | 'developer';
 
 const editors = {
   raw: RawEditor,
   visual: VisualEditor,
   meta: MetadataEditor,
+  developer: DeveloperEditor,
 };
 
 async function postData(url = '', data = {}) {
@@ -57,7 +61,12 @@ function SceneEditor({ state }: SceneEditorProps) {
   const sceneEditorId = state['sceneEditorId'] || 'built-in/preview';
 
   const [editor, setEditor] = useState<EditorTypes>('visual');
-  const [code, setCode] = useState(blankScene);
+  const [code, setCode] = useState(() => {
+    if (state.sceneEditorIsEditing) {
+      return JSON.stringify(getSceneData(sceneEditorId), null, 2);
+    }
+    return blankScene;
+  });
 
   const [comments, setComments] = useState('');
 
@@ -65,6 +74,7 @@ function SceneEditor({ state }: SceneEditorProps) {
     visual: useCallback(() => setEditor('visual'), []),
     raw: useCallback(() => setEditor('raw'), []),
     meta: useCallback(() => setEditor('meta'), []),
+    developer: useCallback(() => setEditor('developer'), []),
   };
 
   let previewedScene: Scene;
@@ -109,6 +119,8 @@ function SceneEditor({ state }: SceneEditorProps) {
     };
   }, [passedState]);
 
+  (window as any).editorState = passedState;
+
   const [isPublishing, setIsPublishing] = useState(false);
   const [isDonePublishing, setIsDonePublishing] = useState(false);
   const onMetaChange = useCallback(
@@ -121,12 +133,18 @@ function SceneEditor({ state }: SceneEditorProps) {
           id: sceneEditorId,
           scene: previewedScene,
           comment: comments,
+          ...(state.sceneEditorIsEditing
+            ? {
+                isEditing: state.sceneEditorIsEditing,
+                developerToken: getLoginToken(),
+              }
+            : {}),
         }).then(() => {
           setIsDonePublishing(true);
         });
       }
     },
-    [parseError, comments, code, sceneEditorId]
+    [parseError, comments, code, sceneEditorId, state.sceneEditorIsEditing]
   );
 
   const goToMainMenu = useCallback(() => {
@@ -163,12 +181,21 @@ function SceneEditor({ state }: SceneEditorProps) {
             Visual Editor
           </button>
           <div style={{ flex: 1 }} />
-          <button
-            className={clsx('editor-switch-button', editor === 'meta' && 'current')}
-            onClick={setEditorTo.meta}
-          >
-            Finish and Publish
-          </button>
+          {state.sceneEditorIsEditing ? (
+            <button
+              className={clsx('editor-switch-button', editor === 'developer' && 'current')}
+              onClick={setEditorTo.developer}
+            >
+              Remote Access
+            </button>
+          ) : (
+            <button
+              className={clsx('editor-switch-button', editor === 'meta' && 'current')}
+              onClick={setEditorTo.meta}
+            >
+              Finish and Publish
+            </button>
+          )}
         </div>
         <div
           style={{

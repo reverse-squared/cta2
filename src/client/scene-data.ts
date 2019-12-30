@@ -13,6 +13,26 @@ export function deleteSceneFromCache(id: string) {
 export function getSceneData(id: string) {
   return sceneCache[id] || null;
 }
+export async function fetchSceneData(id: string): Promise<Scene | null> {
+  if (id in sceneCache || requests.has(id)) {
+    return sceneCache[id] || null;
+  }
+  requests.add(id);
+  await fetch(`/api/scene/${id}`)
+    .then((response) => response.json())
+    .then((json) => {
+      if (json.exists) {
+        sceneCache[id] = validateScene(json.scene);
+      } else {
+        sceneCache[id] = create404Scene(id);
+      }
+    })
+    .catch((error) => {
+      sceneCache[id] = createErrorScene(id, error);
+    });
+  requests.delete(id);
+  return sceneCache[id];
+}
 
 export function useSceneData(id: string, extraScenes?: StringObject<Scene>): Scene | null {
   const [, rerender] = useState(0);
@@ -20,23 +40,7 @@ export function useSceneData(id: string, extraScenes?: StringObject<Scene>): Sce
   if (extraScenes && extraScenes[id]) return extraScenes[id];
 
   if (!(id in sceneCache) && !requests.has(id)) {
-    requests.add(id);
-    fetch(`/api/scene/${id}`)
-      .then((response) => response.json())
-      .then((json) => {
-        if (json.exists) {
-          sceneCache[id] = validateScene(json.scene);
-        } else {
-          sceneCache[id] = create404Scene(id);
-        }
-      })
-      .catch((error) => {
-        sceneCache[id] = createErrorScene(id, error);
-      })
-      .finally(() => {
-        requests.delete(id);
-        rerender(Math.random());
-      });
+    fetchSceneData(id).then(() => rerender(1));
   }
 
   return sceneCache[id] || null;

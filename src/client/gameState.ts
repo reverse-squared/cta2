@@ -1,6 +1,6 @@
 import { Parser } from '../expr-eval';
 import { StringObject } from './type-shorthand';
-import { deleteSceneFromCache } from './scene-data';
+import { deleteSceneFromCache, fetchSceneData } from './scene-data';
 import path from 'path';
 import {
   setEndingAsAchieved,
@@ -77,6 +77,7 @@ export function createGameState(
     __internal_createErrorScene: createErrorSceneOnState,
     __internal_extraScenes: extraScenes,
     __internal_hasAtLeastOneEnding: getAchievedEndingSet().size > 0,
+    __internal_developer: false,
     __internal_PRODUCTION: process.env.PRODUCTION,
   };
   // bind
@@ -105,6 +106,10 @@ function evalMath(this: GameState, input: string | string[], source: string) {
 }
 
 const atLinks: StringObject<(state: GameState) => void> = {
+  '@null': () => {},
+  '@reset': (state) => {
+    state.reset();
+  },
   '@reload': (state) => {
     deleteSceneFromCache(state.scene);
   },
@@ -116,10 +121,6 @@ const atLinks: StringObject<(state: GameState) => void> = {
     state.scene = state.prevScene;
     state.prevScene = '@null';
   },
-  '@reset': (state) => {
-    state.reset();
-  },
-  '@null': () => {},
   '@end': (state) => {
     if (state.__internal_isSceneEditorPreview) {
       state.reset();
@@ -133,6 +134,27 @@ const atLinks: StringObject<(state: GameState) => void> = {
         state.reset('built-in/start');
       }
     }
+  },
+  '@developer_editor': (state) => {
+    state.sceneEditorId = prompt('id to try to edit');
+    if (state.sceneEditorId) {
+      state.sceneEditorIsEditing = true;
+      state.goToScene('/built-in/loading');
+      fetchSceneData(state.sceneEditorId).then(() => {
+        state.goToScene('/built-in/scene-editor');
+      });
+    }
+  },
+  '@developer_editor_here': (state) => {
+    state.sceneEditorIsEditing = true;
+    state.sceneEditorId = state.scene;
+    state.scene = 'built-in/scene-editor';
+  },
+  '@reset-all-progress': () => {
+    localStorage.removeItem('cta2_ending_ids');
+    localStorage.removeItem('cta2_ending_cache');
+    localStorage.removeItem('cta2_login');
+    location.reload();
   },
 };
 

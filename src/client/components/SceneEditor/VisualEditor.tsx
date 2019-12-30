@@ -259,9 +259,6 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
             <h2 style={{ margin: '0' }}>Notice</h2>
             <strong>The visual editor is a work in progress</strong> in beta. It is also missing
             some features such as adding custom logic. For that you can use the Raw Editor.
-            <button style={{ marginTop: '5px' }} onClick={handleBetaDismiss}>
-              Dismiss
-            </button>
           </div>
         ) : null}
 

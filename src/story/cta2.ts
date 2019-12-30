@@ -8,8 +8,8 @@ const cta2BuiltInScenes: StringObject<Scene> = {
   'cta2/plane_waiting': {
     type: 'scene',
     passage: `You're boarding the Community Airlines on your way to Europe, it's going to be a great
-    flight. You got another \${startingFlightTimeLeft} hour\${startingFlightTimeLeft==1?"":"s"} left on your flight, what shall you do
-    to pass the time?`,
+flight. You got another \${startingFlightTimeLeft} hour\${startingFlightTimeLeft==1?"":"s"} left on your flight, what shall you do
+to pass the time?`,
     options: [
       {
         label: 'Try to fall asleep',
@@ -40,7 +40,7 @@ const cta2BuiltInScenes: StringObject<Scene> = {
   'cta2/plane_getUp': {
     type: 'scene',
     passage: `You get from from the window seat, having to cross over two sleeping passengers.
-    There are 173 other passengers aboard this plane. You are seated in the economy section.`,
+There are 173 other passengers aboard this plane. You are seated in the economy section.`,
     options: [
       {
         label: 'Go to the bathroom',
@@ -69,9 +69,9 @@ const cta2BuiltInScenes: StringObject<Scene> = {
     type: 'scene',
     passage: `Your intense journey of standing up and sitting down took an entire hour.
 
-    You're boarding the Community Airlines on your way to Europe, it's going to be a great
-    flight. You got another \${startingFlightTimeLeft} hours left on your flight, what shall you do
-    to pass the time?`,
+You're boarding the Community Airlines on your way to Europe, it's going to be a great
+flight. You got another \${startingFlightTimeLeft} hours left on your flight, what shall you do
+to pass the time?`,
     options: [
       {
         label: 'Try to fall asleep',

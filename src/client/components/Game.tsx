@@ -1,8 +1,8 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import clsx from 'clsx';
-import { Source, Scene } from '../../shared/types';
+import { Scene } from '../../shared/types';
 import FancyText from './FancyText';
-import { AnchorClickEvent, StringObject } from '../type-shorthand';
+import { AnchorClickEvent, ButtonClickEvent, StringObject } from '../type-shorthand';
 import { useSceneData } from '../scene-data';
 import { GameState } from '../gameState';
 import '../css/scene.css';
@@ -30,11 +30,20 @@ function Game({ state, extraScenes, sceneEditorId }: GameProps) {
   state.__internal_isSceneEditorPreview = sceneEditorId !== undefined;
 
   const handleOptionClick = useCallback(
-    (ev: AnchorClickEvent) => {
+    (ev: AnchorClickEvent | ButtonClickEvent) => {
       ev.preventDefault();
-      if (scene !== null && scene.type === 'scene') {
-        const index = parseInt(ev.currentTarget.getAttribute('option-id') || '');
-        const option = scene.options[index];
+      const index =
+        ev.currentTarget.getAttribute('option-id') ||
+        (ev.currentTarget.parentElement &&
+          ev.currentTarget.parentElement.getAttribute('option-id')) ||
+        '';
+
+      if (index === 'dev-editor-here') {
+        state.goToScene('@developer_editor_here');
+      } else if (index === 'end') {
+        state.goToScene('@end');
+      } else if (scene !== null && scene.type === 'scene') {
+        const option = scene.options[parseInt(index)];
         if (option !== 'separator') {
           if (option.onActivate) {
             state.eval(option.onActivate, `option[${index}].onActivate`);
@@ -43,8 +52,6 @@ function Game({ state, extraScenes, sceneEditorId }: GameProps) {
             state.goToScene(option.to);
           }
         }
-      } else if (ev.currentTarget.getAttribute('option-id') === 'end') {
-        state.goToScene('@end');
       }
     },
     [scene]
@@ -101,95 +108,103 @@ function Game({ state, extraScenes, sceneEditorId }: GameProps) {
     <>
       {inspector && <CTAInspector state={state} onClose={state.__internal_toggleInspector} />}
       <div className='sceneWrap'>
-        <div className={'scene'}>
-          {title && <h1>{title}</h1>}
-          {scene.css && <style>{scene.css}</style>}
-          <FancyText state={state} text={scene.passage} />
-          {scene.meta === 'credits' && <Credits />}
-          {scene.meta === 'main-menu' && <EndingProgress />}
-          {scene.type === 'scene' ? (
-            <>
-              <ul>
-                {scene.options.concat('separator').map((option, i) => {
-                  if (option === 'separator') {
-                    if (justOutputtedSeparator) {
-                      return null;
-                    } else {
-                      justOutputtedSeparator = true;
-                      return <li key={i} className={clsx('option', 'optionSeparator')}></li>;
-                    }
-                  } else {
-                    let visible = true;
-                    if (option.isVisible) {
-                      visible = !!state.eval(option.isVisible, `option[${i}].isVisible`);
-                    }
-                    if (visible) {
-                      justOutputtedSeparator = false;
-                      let disabled = false;
-                      if (option.isDisabled) {
-                        disabled = !!state.eval(option.isDisabled, `option[${i}].isVisible`);
+        <div className='scene'>
+          <div>
+            {title && <h1>{title}</h1>}
+            {scene.css && <style>{scene.css}</style>}
+            <FancyText state={state} text={scene.passage} />
+            {scene.meta === 'credits' && <Credits />}
+            {scene.meta === 'main-menu' && <EndingProgress />}
+            {scene.type === 'scene' ? (
+              <>
+                <ul>
+                  {scene.options.concat('separator').map((option, i) => {
+                    if (option === 'separator') {
+                      if (justOutputtedSeparator) {
+                        return null;
+                      } else {
+                        justOutputtedSeparator = true;
+                        return <li key={i} className={clsx('option', 'optionSeparator')}></li>;
                       }
-                      return (
-                        <li key={i} className={clsx('option', disabled && 'optionDisabled')}>
-                          <a
-                            className={'optionLink'}
-                            href='#'
-                            onClick={handleOptionClick}
+                    } else {
+                      let visible = true;
+                      if (option.isVisible) {
+                        visible = !!state.eval(option.isVisible, `option[${i}].isVisible`);
+                      }
+                      if (visible) {
+                        justOutputtedSeparator = false;
+                        let disabled = false;
+                        if (option.isDisabled) {
+                          disabled = !!state.eval(option.isDisabled, `option[${i}].isVisible`);
+                        }
+                        return (
+                          <li
+                            key={i}
+                            className={clsx('option', disabled && 'optionDisabled')}
                             option-id={i}
                           >
-                            <FancyText inline disableLinks state={state} text={option.label} />
-                          </a>
-                        </li>
-                      );
+                            <a className={'optionLink'} href='#' onClick={handleOptionClick}>
+                              <FancyText inline disableLinks state={state} text={option.label} />
+                            </a>
+                          </li>
+                        );
+                      }
                     }
-                  }
-                })}
-              </ul>
-              {scene.meta === 'endings' && <EndingList state={state} />}
-            </>
-          ) : (
-            <>
-              {!sceneEditorId ? (
-                state.isEndingAchieved(state.scene) ? (
-                  <p className='ending-text ending-text-old'>You've already gotten this ending.</p>
-                ) : (
-                  <p className='ending-text ending-text-new'>You've discovered a new ending!</p>
-                )
-              ) : (
-                <p className='ending-text' />
-              )}
-              <div className={'ending'}>
-                <div className={'endingTitle'}>
-                  <FancyText inline disableLinks state={state} text={scene.title} />
-                </div>
-                <div className={'endingDescription'}>
-                  <FancyText state={state} text={scene.description} />
-                </div>
-              </div>
-              {sceneEditorId !== state.scene && (
-                <ul>
-                  <li className={clsx('option')}>
-                    <a
-                      className={'optionLink'}
-                      href='#'
-                      onClick={handleOptionClick}
-                      option-id={'end'}
-                    >
-                      End Game
-                    </a>
-                  </li>
+                  })}
                 </ul>
-              )}
+                {scene.meta === 'endings' && <EndingList state={state} />}
+              </>
+            ) : (
+              <>
+                {!sceneEditorId ? (
+                  state.isEndingAchieved(state.scene) ? (
+                    <p className='ending-text ending-text-old'>
+                      You've already gotten this ending.
+                    </p>
+                  ) : (
+                    <p className='ending-text ending-text-new'>You've discovered a new ending!</p>
+                  )
+                ) : (
+                  <p className='ending-text' />
+                )}
+                <div className={'ending'}>
+                  <div className={'endingTitle'}>
+                    <FancyText inline disableLinks state={state} text={scene.title} />
+                  </div>
+                  <div className={'endingDescription'}>
+                    <FancyText state={state} text={scene.description} />
+                  </div>
+                </div>
+                {sceneEditorId !== state.scene && (
+                  <ul>
+                    <li className={clsx('option')} option-id='end'>
+                      <a className={'optionLink'} href='#' onClick={handleOptionClick}>
+                        End Game
+                      </a>
+                    </li>
+                  </ul>
+                )}
+              </>
+            )}
+            {scene.source !== null && (
+              <p className={'source'}>
+                {scene.type === 'scene' ? 'Scene' : 'Ending'} Contributed from{' '}
+                {formatSource(scene.source)}
+              </p>
+            )}
+          </div>
+          {state.__internal_developer && (
+            <>
+              <div className='grow' />
+              <h3>developer:</h3>
+              <div>
+                <button onClick={handleOptionClick} option-id='dev-editor-here'>
+                  edit
+                </button>
+                <button onClick={state.__internal_toggleInspector}>inspect</button>
+              </div>
+              <div style={{ height: '20px' }} />
             </>
-          )}
-          {scene.source !== null && (
-            <p className={'source'}>
-              {scene.type === 'scene' ? 'Scene' : 'Ending'} Contributed from{' '}
-              {formatSource(scene.source)}
-              {scene.type === 'ending'
-                ? ` - This scene has been viewed ${scene.views} times.`
-                : null}
-            </p>
           )}
         </div>
       </div>

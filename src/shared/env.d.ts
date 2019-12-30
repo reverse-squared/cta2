@@ -7,6 +7,7 @@ export interface Env {
     moderatorRoleId: string;
   };
   googleAnalyticsID: string | null;
+  developerPassword: string;
 }
 const env: Env;
 export default env;

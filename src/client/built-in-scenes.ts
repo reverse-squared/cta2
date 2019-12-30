@@ -64,12 +64,18 @@ export function create404Scene(id: string): Scene {
 }
 
 export const builtInScenes: StringObject<Scene> = {
+  'built-in/loading': {
+    type: 'scene',
+    passage: '',
+    options: [],
+    source: null,
+    meta: 'loading',
+  },
   'built-in/start': {
     type: 'scene',
     passage: `Welcome to the **Community Text Adventure: Season 2**. This is the second installment
-      of CTA, where you (yes, *you*, the player) can suggest new paths, endings, and vote to create
-      the story. Be sure to join the Discord server to be able to vote on new scenes.
-    `,
+of CTA, where you (yes, *you*, the player) can suggest new paths, endings, and vote to create
+the story. Be sure to join the Discord server to be able to vote on new scenes.`,
     options: [
       {
         label: 'Play CTA: Season 2',
@@ -88,12 +94,17 @@ export const builtInScenes: StringObject<Scene> = {
       },
       'separator',
       {
-        label: '**DEBUG**: Scene Editor',
+        label: '**DEVELOPER**: Scene Editor',
         onActivate: `reset("/built-in/scene-editor");sceneEditorId="built-in/demo"`,
         isVisible: 'not __internal_PRODUCTION',
       },
       {
-        label: '**DEBUG**: Inspector',
+        label: '**DEVELOPER**: Edit a Scene',
+        to: '@developer_editor',
+        isVisible: 'not __internal_PRODUCTION',
+      },
+      {
+        label: '**DEVELOPER**: Inspector',
         onActivate: '__internal_toggleInspector()',
         isVisible: 'not __internal_PRODUCTION',
       },
@@ -110,8 +121,16 @@ export const builtInScenes: StringObject<Scene> = {
         label: 'Read the Documentation',
         to: 'https://reverse-squared.github.io/cta2/#/',
       },
+      'separator',
+      {
+        label: 'Reset',
+        to: 'reset-progress',
+        isVisible: '__internal_hasAtLeastOneEnding',
+      },
     ],
     meta: 'main-menu',
+    css:
+      '[option-id="13"]{color:rgba(255,255,255,0.3);list-style:none;text-align:right;margin-top:20px}',
     source: null,
   },
   'built-in/credits': {
@@ -171,9 +190,9 @@ export const builtInScenes: StringObject<Scene> = {
   'built-in/first-time-introduction': {
     type: 'scene',
     passage: `Community Text Adventure is a game about endings. Good and Bad, there are infinite
-              possibilities of what you can do here.
+possibilities of what you can do here.
 
-              You've got a long way to go, with \${__internal_endingCount} endings in the game.`,
+You've got a long way to go, with \${__internal_endingCount} endings in the game.`,
     options: [
       {
         label: '*Time to collect some endings!*',
@@ -200,5 +219,23 @@ export const builtInScenes: StringObject<Scene> = {
     css: errorCSS,
     source: null,
   },
+  'built-in/reset-progress': {
+    type: 'scene',
+    passage: 'Are you really sure?',
+    options: [
+      {
+        label: 'YES, reset *ALL* my progress',
+        to: '@reset-all-progress',
+      },
+      {
+        label: 'No, keep my data',
+        to: '@undo',
+      },
+    ],
+    onActivate: 'oldTitle=title;title="Reset all Progress"',
+    onDeactivate: 'title=oldTitle',
+    source: null,
+  },
+  // game starters
   ...cta2BuiltInScenes,
 };

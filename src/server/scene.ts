@@ -44,7 +44,7 @@ export async function getScene(id: string): Promise<Scene | null> {
 }
 
 /** Returns Scene or null if no exist */
-export async function createScene(id: string, scene: Scene) {
+export async function createScene(id: string, scene: Scene, overwrite = false) {
   if (id.includes('..')) {
     throw new Error('Scene name cannot contain ..');
   }
@@ -69,14 +69,14 @@ export async function createScene(id: string, scene: Scene) {
       .eq(1)
   );
 
-  if (exists) {
+  if (exists && !overwrite) {
     throw new Error(`Scene ${id} already exists`);
   }
 
   await runDb(
     ctaDb()
       .table('scenes')
-      .insert({ id: id, type: scene.type, scene: scene })
+      .insert({ id: id, type: scene.type, scene: scene }, { conflict: 'replace' })
   );
 
   const sources: { name: string; desc?: string }[] =
