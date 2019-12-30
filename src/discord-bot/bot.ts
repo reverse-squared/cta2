@@ -43,7 +43,7 @@ export function initBot() {
   }
 }
 
-function getDiscordEmbed(
+async function getDiscordEmbed(
   id: string,
   scene: Scene,
   time: number,
@@ -146,17 +146,36 @@ async function watchForVoting(request: SceneRequest) {
   );
 
   moderatorVoteCollector.on('collect', async (reaction) => {
+    const message = await votingChannel.fetchMessage(request.discordMessageId);
+
+    const upvotes = message.reactions.find((react) => react.emoji.name === '👍').count - 1;
+    const downvotes = message.reactions.find((react) => react.emoji.name === '👎').count - 1;
+
     if (reaction.emoji.name === '✅') {
       // accept
       createScene(request.id, request.scene);
 
       archiveChannel.send({
-        embed: getDiscordEmbed(request.id, request.scene, Date.now(), 'force-accept'),
+        embed: getDiscordEmbed(
+          request.id,
+          request.scene,
+          Date.now(),
+          'force-accept',
+          upvotes,
+          downvotes
+        ),
       });
     } else if (reaction.emoji.name === '❌') {
       // delete
       archiveChannel.send({
-        embed: getDiscordEmbed(request.id, request.scene, Date.now(), 'force-deny'),
+        embed: getDiscordEmbed(
+          request.id,
+          request.scene,
+          Date.now(),
+          'force-deny',
+          upvotes,
+          downvotes
+        ),
       });
     } else {
       return;
