@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>CTA 2</title>
+
+    <style>
+      @import url('https://fonts.googleapis.com/css?family=Roboto+Mono|Roboto:400,400i,700,700i&display=swap');
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background-color: #202322;
+        color: white;
+        font-family: Roboto, sans-serif;
+        font-size: 18px;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #root {
+        flex: 1;
+      }
+
+      ::-webkit-scrollbar {
+        background: #191b1b;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #64ed98;
+        border-radius: 7px;
+        border: 3px solid #191b1b;
+      }
+
+      h1 {
+        font-size: 34px;
+        color: #64ed98;
+        text-decoration: underline;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      br,
+      button {
+        user-select: none;
+      }
+
+      .link {
+        color: #64ed98;
+      }
+      .link:not(:hover) {
+        text-decoration: none;
+      }
+    </style>
+    <script src="./api/client_env.js"></script>
+  </head>
+  <body>
+    <div id="root">
+      <noscript>
+        <h1>Uh Oh</h1>
+        <p>
+          It seems like you don't have JavaScript Enabled.
+        </p>
+        <p>
+          Please note that CTA 2 does not support Internet Explorer, please try a different browser
+          such as Firefox or Chrome.
+        </p>
+      </noscript>
+    </div>
+  </body>
+</html>

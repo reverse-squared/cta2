@@ -23,6 +23,16 @@ const otherCache = new NodeCache({ stdTTL: 240 });
 
 app.use(bodyParser.json());
 
+app.get('/api/client_env.js', (req, res) => {
+  // CLIENT ENVIRONMENT
+  const clientEnv = {
+    googleAnalyticsID: env.googleAnalyticsID,
+  };
+
+  res.setHeader('Content-Type', 'text/javascript');
+  res.end(`window.__ENV=${JSON.stringify(clientEnv)}`);
+});
+
 app.get('/api/scene/*', async (req, res) => {
   const sceneName = req.url.substr(11);
   const cachedScene = sceneCache.get(sceneName);
