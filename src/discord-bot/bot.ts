@@ -94,7 +94,12 @@ async function getDiscordEmbed(
       : {
           title: `New Ending: ${id}`,
           description: scene.passage,
-          // TODO: add the rest
+          fields: [
+            {
+              name: scene.title,
+              value: scene.description
+            }
+          ]
         };
 
   return {
