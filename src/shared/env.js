@@ -1,5 +1,7 @@
 if (process.env.IS_SERVER) {
-  module.exports = require('../../env.json');
+  module.exports = JSON.parse(
+    require('fs').readFileSync(require('path').join(__dirname, '../../env.json'))
+  );
 } else {
-  module.exports = require('!!../tools/env-filter-loader!../../env.json');
+  module.exports = window.__ENV;
 }
