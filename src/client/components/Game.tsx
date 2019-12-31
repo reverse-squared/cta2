@@ -85,6 +85,15 @@ function Game({ state, extraScenes, sceneEditorId }: GameProps) {
       if (scene.type === 'ending') {
         analyticsEndingView(state.scene);
       }
+
+      if (scene.type === 'scene') {
+        if (!state.visitedScenes.includes(state.scene) && scene.onFirstActivate) {
+          state.eval(scene.onFirstActivate, 'onFirstActivate');
+        }
+        if (scene.onActivate) {
+          state.eval(scene.onActivate, 'onActivate');
+        }
+      }
     }
   }, [scene]);
 

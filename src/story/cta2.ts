@@ -18,14 +18,16 @@ to pass the time?`,
       {
         label: 'Demand to get a 1st class seat',
         to: 'plane_becomeKaren',
+        isDisabled: 'plane_becomeKaren',
       },
       {
         label: 'Look out the window',
         to: 'plane_lookOutTheWindow',
       },
       {
-        label: 'Play on your phone',
+        label: 'Play on your phone${phone_isLocked?" (Locked for 15 Days)":""}',
         to: 'plane_playOnYourPhone',
+        isDisabled: 'plane_playedOnPhone or phone_isLocked',
       },
       {
         label: 'Get up from your seat',
@@ -86,7 +88,7 @@ to pass the time?`,
         to: 'plane_lookOutTheWindow',
       },
       {
-        label: 'Play on your phone',
+        label: 'Play on your phone${phone_isLocked?" (Locked for 15 Days)":""}',
         to: 'plane_playOnYourPhone',
         isDisabled: 'plane_playedOnPhone or phone_isLocked',
       },

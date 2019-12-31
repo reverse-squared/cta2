@@ -202,18 +202,6 @@ function goToScene(this: GameState, link: string) {
     ) {
       this.scene = builtInScenes[this.scene].meta.substr(9);
     }
-
-    const scene2 =
-      (this.__internal_extraScenes && this.__internal_extraScenes[this.scene]) ||
-      getSceneData(this.scene);
-    if (scene2 && scene2.type === 'scene') {
-      if (!this.visitedScenes.includes(this.scene) && scene2.onFirstActivate) {
-        this.eval(scene2.onFirstActivate, 'onFirstActivate');
-      }
-      if (scene2.onActivate) {
-        this.eval(scene2.onActivate, 'onActivate');
-      }
-    }
   }
   this.__internal_eventListener.emit();
 }
