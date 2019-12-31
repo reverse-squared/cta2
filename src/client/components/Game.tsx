@@ -126,11 +126,16 @@ function Game({ state, extraScenes, sceneEditorId }: GameProps) {
   return (
     <>
       {inspector && <CTAInspector state={state} onClose={state.__internal_toggleInspector} />}
+      {scene.css && <style>{scene.css}</style>}
       <div className='sceneWrap'>
         <div className='scene'>
           <div>
             {title && <h1>{title}</h1>}
-            {scene.css && <style>{scene.css}</style>}
+            {scene.meta === 'main-menu' && (
+              <div className='version-text'>
+                Engine Version {process.env.VERSION.replace(/\.[0-9]+($|-)/, '$1')}
+              </div>
+            )}
             <FancyText state={state} text={scene.passage} />
             {scene.meta === 'credits' && <Credits />}
             {scene.meta === 'main-menu' && <EndingProgress />}

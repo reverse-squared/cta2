@@ -95,7 +95,7 @@ function VisualEditor({ code, onCodeChange }: SceneEditorEditorProps) {
         obj.description = scene.description;
       }
 
-      if (!isNotBlank(scene.css || '')) {
+      if (isNotBlank(scene.css || '')) {
         obj.css = scene.css;
       }
 

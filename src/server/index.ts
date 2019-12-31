@@ -78,7 +78,17 @@ app.get('/api/sources', async (req, res) => {
   if (cached) {
     res.send(cached);
   } else {
-    const data = await getAllSources();
+    const data = (await getAllSources())
+      .sort(function(a, b) {
+        if (a.name < b.name) {
+          return -1;
+        }
+        if (a.name > b.name) {
+          return 1;
+        }
+        return 0;
+      })
+      .filter((x) => x.id !== 'anonymous');
     res.send(data);
     otherCache.set('sources', data);
   }

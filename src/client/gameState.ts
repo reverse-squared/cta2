@@ -78,7 +78,6 @@ export function createGameState(
     __internal_extraScenes: extraScenes,
     __internal_hasAtLeastOneEnding: getAchievedEndingSet().size > 0,
     __internal_developer: false,
-    __internal_PRODUCTION: process.env.PRODUCTION,
   };
   // bind
   state.reset = resetGameState.bind(state, startingScene);
@@ -118,8 +117,10 @@ const atLinks: StringObject<(state: GameState) => void> = {
     delete state.runtimeErrorStack;
     delete state.runtimeErrorExpression;
 
-    state.scene = state.prevScene;
-    state.prevScene = '@null';
+    if (state.prevScene !== '@null') {
+      state.scene = state.prevScene;
+      state.prevScene = '@null';
+    }
   },
   '@end': (state) => {
     if (state.__internal_isSceneEditorPreview) {
