@@ -88,7 +88,7 @@ to pass the time?`,
       {
         label: 'Play on your phone',
         to: 'plane_playOnYourPhone',
-        isDisabled: 'plane_playedOnPhone',
+        isDisabled: 'plane_playedOnPhone or phone_isLocked',
       },
       {
         label: 'Get up from your seat',

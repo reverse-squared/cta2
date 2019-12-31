@@ -18,8 +18,8 @@ connectToDatabase();
 initBot();
 
 // Create caches.
-const sceneCache = new NodeCache({ stdTTL: 86400 });
-const otherCache = new NodeCache({ stdTTL: 240 });
+const sceneCache = new NodeCache({ stdTTL: 10000 });
+const otherCache = new NodeCache({ stdTTL: 10000 });
 
 app.use(bodyParser.json());
 
@@ -119,8 +119,10 @@ app.post('/api/request', async (req, res) => {
     }
     postScene(req.body.id, req.body.scene, req.body.comment);
     res.send({ error: false });
+    if (req.body.isEditing) {
+      otherCache.flushAll();
+    }
   } catch (error) {
-    console.log(error);
     res.send({ error: error.message });
   }
 });

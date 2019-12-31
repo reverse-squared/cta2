@@ -1,7 +1,7 @@
 {
   "name": "cta2",
   "description": "Boilerplate code for making a server side app using React, Socket.io, and TypeScript.",
-  "version": "1.0.0",
+  "version": "2.0.0-beta",
   "author": "Dave Caruso",
   "scripts": {
     "start": "node src/tools/check-env && fullstack-system dev",
