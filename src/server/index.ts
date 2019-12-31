@@ -108,6 +108,9 @@ app.post('/api/request', async (req, res) => {
     if (req.body.isEditing) {
       if (req.body.developerToken === env.developerPassword) {
         createScene(req.body.id, req.body.scene, true);
+
+        sceneCache.del(req.body.id);
+
         res.send({ error: false });
       } else {
         throw new Error();
