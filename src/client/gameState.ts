@@ -78,7 +78,6 @@ export function createGameState(
     __internal_extraScenes: extraScenes,
     __internal_hasAtLeastOneEnding: getAchievedEndingSet().size > 0,
     __internal_developer: false,
-    __internal_PRODUCTION: process.env.PRODUCTION,
   };
   // bind
   state.reset = resetGameState.bind(state, startingScene);
@@ -118,8 +117,10 @@ const atLinks: StringObject<(state: GameState) => void> = {
     delete state.runtimeErrorStack;
     delete state.runtimeErrorExpression;
 
-    state.scene = state.prevScene;
-    state.prevScene = '@null';
+    if (state.prevScene !== '@null') {
+      state.scene = state.prevScene;
+      state.prevScene = '@null';
+    }
   },
   '@end': (state) => {
     if (state.__internal_isSceneEditorPreview) {
@@ -201,18 +202,6 @@ function goToScene(this: GameState, link: string) {
       builtInScenes[this.scene].meta.startsWith('redirect:')
     ) {
       this.scene = builtInScenes[this.scene].meta.substr(9);
-    }
-
-    const scene2 =
-      (this.__internal_extraScenes && this.__internal_extraScenes[this.scene]) ||
-      getSceneData(this.scene);
-    if (scene2 && scene2.type === 'scene') {
-      if (!this.visitedScenes.includes(this.scene) && scene2.onFirstActivate) {
-        this.eval(scene2.onFirstActivate, 'onFirstActivate');
-      }
-      if (scene2.onActivate) {
-        this.eval(scene2.onActivate, 'onActivate');
-      }
     }
   }
   this.__internal_eventListener.emit();

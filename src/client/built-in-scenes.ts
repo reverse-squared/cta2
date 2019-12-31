@@ -96,17 +96,17 @@ the story. Be sure to join the Discord server to be able to vote on new scenes.`
       {
         label: '**DEVELOPER**: Scene Editor',
         onActivate: `reset("/built-in/scene-editor");sceneEditorId="built-in/demo"`,
-        isVisible: 'not __internal_PRODUCTION',
+        isVisible: '__internal_developer',
       },
       {
         label: '**DEVELOPER**: Edit a Scene',
         to: '@developer_editor',
-        isVisible: 'not __internal_PRODUCTION',
+        isVisible: '__internal_developer',
       },
       {
         label: '**DEVELOPER**: Inspector',
         onActivate: '__internal_toggleInspector()',
-        isVisible: 'not __internal_PRODUCTION',
+        isVisible: '__internal_developer',
       },
       'separator',
       {

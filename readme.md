@@ -1,1 +1,1 @@
-# CTA 2 Engine
+# Community Text Adventure Season 2

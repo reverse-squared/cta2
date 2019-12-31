@@ -13,23 +13,28 @@ interface FancyTextProps {
 }
 
 interface FTMRules {
-  italic?: boolean;
-  bold?: boolean;
-  strike?: boolean;
-  underline?: boolean;
-  code?: boolean;
-  blockCode?: boolean;
+  [custom: string]: boolean;
+  // italic?: boolean;
+  // bold?: boolean;
+  // strike?: boolean;
+  // underline?: boolean;
+  // code?: boolean;
+  // blockCode?: boolean;
 }
 interface FTMPart {
   text: string;
-  styles?: (keyof FTMRules)[];
+  styles?: string[];
 }
 
 function mapFTMPart(part: FTMPart, index: number) {
   return (
     <span
       key={index}
-      className={part.styles ? part.styles.map((x) => 'ftm-' + x).join(' ') : undefined}
+      className={
+        part.styles
+          ? part.styles.map((x) => (x.startsWith('custom-') ? x.substr(7) : 'ftm-' + x)).join(' ')
+          : undefined
+      }
     >
       {part.text}
     </span>
@@ -61,7 +66,7 @@ function FancyText({ text, state, inline, disableLinks, disableExpressions }: Fa
     if (chunk.length === 0) {
       return;
     }
-    let styles = (Object.keys(rules) as (keyof FTMRules)[]).filter((rule) => rules[rule]);
+    let styles = (Object.keys(rules) as string[]).filter((rule) => rules[rule]);
     if (styles.length > 0) {
       if (styles.includes('code')) {
         styles = ['code'];
@@ -151,8 +156,23 @@ function FancyText({ text, state, inline, disableLinks, disableExpressions }: Fa
       endPart();
       rules.code = !rules.code;
     }
+    // custom classes
+    else if (!rules.blockCode && !rules.code && text[i] === '<') {
+      const match = text.substr(i).match(/<(\/)?([\w-]+)>/);
+      if (match) {
+        endPart();
+        rules['custom-' + match[2]] = match[1] !== '/';
+        i += match[0].length - 1;
+      } else {
+        chunk += '<';
+      }
+    }
     // escape
-    else if (!rules.blockCode && text[i] === '\\' && ['*', '`', '~', '\\'].includes(text[i + 1])) {
+    else if (
+      !rules.blockCode &&
+      text[i] === '\\' &&
+      ['*', '`', '~', '\\', '<'].includes(text[i + 1])
+    ) {
       chunk += text[i + 1];
       i++;
     }

@@ -45,8 +45,9 @@ export function initBot() {
   }
 }
 
-async function getDiscordEmbed(
+function getDiscordEmbed(
   id: string,
+  requestId: string | null,
   scene: Scene,
   time: number,
   state: 'open' | 'closed-accept' | 'closed-deny' | 'force-accept' | 'force-deny',
@@ -69,7 +70,7 @@ async function getDiscordEmbed(
             } | ${upvotes} 👍, ${downvotes} 👎`,
     },
     timestamp: time,
-    author: { name: formatSource(scene.source) },
+    author: { name: formatSource(scene.source).substr(0, 250) },
   };
 
   const sceneEmbedPart =
@@ -77,38 +78,43 @@ async function getDiscordEmbed(
       ? {
           title: `New Scene: ${id}`,
           description: scene.passage,
-          fields: scene.options.map((option) => {
-            if (option === 'separator') {
-              return {
-                name: '​',
-                value: '​',
-              };
-            }
+          fields: scene.options
+            .map((option) => {
+              if (option === 'separator') {
+                return {
+                  name: '​',
+                  value: '​',
+                };
+              }
 
-            return {
-              name: option.label,
-              value: `Goes to \`${option.to}\`.`,
-            };
-          }),
+              return {
+                name: option.label.substr(0, 250),
+                value: `Goes to \`${option.to}\`.`.substr(0, 1000),
+              };
+            })
+            .slice(0, 25),
         }
       : {
           title: `New Ending: ${id}`,
-          description: scene.passage,
+          description: scene.passage.substr(0, 2048),
           fields: [
             {
               name: scene.title,
-              value: scene.description
-            }
-          ]
+              value: scene.description.substr(0, 1000),
+            },
+          ],
         };
 
   return {
     ...embedBase,
     ...sceneEmbedPart,
+    ...(requestId && {
+      url: 'https://cta2.davecode.me/inspect_request/' + requestId,
+    }),
   };
 }
 
-async function deleteRequetsOfLikeId(id: string) {
+async function deleteRequestsOfLikeId(id: string) {
   const requestsToRemove = await runDb(
     ctaDb()
       .table('requests')
@@ -133,9 +139,18 @@ async function deleteRequetsOfLikeId(id: string) {
 }
 
 async function watchForVoting(request: SceneRequest) {
-  const message = await votingChannel.fetchMessage(request.discordMessageId);
-  if (!message) {
-    throw new Error('Message does not exist.');
+  let message: Discord.Message;
+  try {
+    message = await votingChannel.fetchMessage(request.discordMessageId);
+    if (!message) {
+      throw new Error('Message does not exist.');
+    }
+  } catch (error) {
+    commentChannel.send(
+      `Request \`${request.uuid}\` (for \`${request.id}\`)'s discord message wasn't found, deleting...`
+    );
+    deleteRequest(request.uuid);
+    return;
   }
 
   // Create a reaction collector for when an admin forces a vote.
@@ -165,6 +180,7 @@ async function watchForVoting(request: SceneRequest) {
       archiveChannel.send({
         embed: getDiscordEmbed(
           request.id,
+          null,
           request.scene,
           Date.now(),
           'force-accept',
@@ -172,11 +188,17 @@ async function watchForVoting(request: SceneRequest) {
           downvotes
         ),
       });
+      commentChannel.send(
+        `**REQUEST ADDED** \`${request.uuid}\` (for \`${request.id}\`); forced by ${
+          reaction.users.array()[0]
+        }`
+      );
     } else if (reaction.emoji.name === '❌') {
       // delete
       archiveChannel.send({
         embed: getDiscordEmbed(
           request.id,
+          null,
           request.scene,
           Date.now(),
           'force-deny',
@@ -190,7 +212,7 @@ async function watchForVoting(request: SceneRequest) {
 
     message.delete();
     deleteRequest(request.uuid);
-    deleteRequetsOfLikeId(request.id);
+    deleteRequestsOfLikeId(request.id);
   });
 
   setTimeout(async () => {
@@ -204,6 +226,7 @@ async function watchForVoting(request: SceneRequest) {
       archiveChannel.send({
         embed: getDiscordEmbed(
           request.id,
+          null,
           request.scene,
           request.ends,
           'closed-deny',
@@ -211,10 +234,12 @@ async function watchForVoting(request: SceneRequest) {
           downvotes
         ),
       });
+      commentChannel.send(`**REQUEST ADDED** \`${request.uuid}\` (for \`${request.id}\`)`);
     } else {
       archiveChannel.send({
         embed: getDiscordEmbed(
           request.id,
+          null,
           request.scene,
           request.ends,
           'closed-deny',
@@ -224,25 +249,8 @@ async function watchForVoting(request: SceneRequest) {
       });
     }
 
-    deleteRequetsOfLikeId(request.id);
+    deleteRequestsOfLikeId(request.id);
   }, request.ends - Date.now());
-}
-
-function cleanScene(scene: Scene): Scene {
-  let cleanedScene = scene;
-
-  // Remove empty options.
-  if (scene.type === 'scene') {
-    scene.options = scene.options.filter((option) => {
-      return option === 'separator' || (option.label && option.to);
-    });
-  }
-
-  // Remvoe empty sources.
-
-  // Trim trailing whitespace.
-
-  return cleanedScene;
 }
 
 export async function postScene(id: string, scene: Scene, comment: string) {
@@ -254,18 +262,16 @@ export async function postScene(id: string, scene: Scene, comment: string) {
     return;
   }
 
-  const cleanedScene = cleanScene(scene);
-
   const now = Date.now();
-
-  const embed = getDiscordEmbed(id, cleanedScene, now, 'open');
-
+  const embed = getDiscordEmbed(id, null, scene, now, 'open');
   const message = (await votingChannel.send({ embed: embed })) as Discord.Message;
+  const request = await createRequestInDb(id, scene, message.id, now);
+  const embed2 = getDiscordEmbed(id, request.id, scene, now, 'open');
+
+  await message.edit(embed2);
 
   await message.react('👍');
   await message.react('👎');
-
-  const request = await createRequestInDb(id, cleanedScene, message.id, now);
 
   watchForVoting(request);
 

@@ -14,16 +14,16 @@ Object.defineProperty(window, 'I_AM_DEVELOPER', {
       setLoginToken(token);
       alert('developer mode features enabled');
 
-      state.__internal_PRODUCTION = false;
       state.__internal_developer = true;
       state.__internal_eventListener.emit();
+      (window as any).state = state;
     }
   },
 });
 
 if (isDeveloperMode()) {
-  state.__internal_PRODUCTION = false;
   state.__internal_developer = true;
+  (window as any).state = state;
 }
 
 function App() {

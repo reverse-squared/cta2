@@ -18,8 +18,8 @@ connectToDatabase();
 initBot();
 
 // Create caches.
-const sceneCache = new NodeCache({ stdTTL: 86400 });
-const otherCache = new NodeCache({ stdTTL: 240 });
+const sceneCache = new NodeCache({ stdTTL: 10000 });
+const otherCache = new NodeCache({ stdTTL: 10000 });
 
 app.use(bodyParser.json());
 
@@ -78,7 +78,17 @@ app.get('/api/sources', async (req, res) => {
   if (cached) {
     res.send(cached);
   } else {
-    const data = await getAllSources();
+    const data = (await getAllSources())
+      .sort(function(a, b) {
+        if (a.name < b.name) {
+          return -1;
+        }
+        if (a.name > b.name) {
+          return 1;
+        }
+        return 0;
+      })
+      .filter((x) => x.id !== 'anonymous');
     res.send(data);
     otherCache.set('sources', data);
   }
@@ -90,19 +100,19 @@ const allowedSceneNames = [/cta2\/.*/];
 app.post('/api/request', async (req, res) => {
   try {
     if (!req.body) {
-      throw new Error();
+      throw new Error('no body');
     }
     if (typeof req.body !== 'object') {
-      throw new Error();
+      throw new Error('not obj');
     }
     if (typeof req.body.id !== 'string') {
-      throw new Error();
+      throw new Error('no id');
     }
     if (!allowedSceneNames.some((x) => x.exec(req.body.id))) {
-      throw new Error();
+      throw new Error('scene name banned');
     }
     if (typeof req.body.comment !== 'string') {
-      throw new Error();
+      throw new Error('comment not a string');
     }
     validateScene(req.body.scene);
     if (req.body.isEditing) {
@@ -113,16 +123,19 @@ app.post('/api/request', async (req, res) => {
 
         res.send({ error: false });
       } else {
-        throw new Error();
+        throw new Error('incorrect developer information');
       }
       return;
     }
-    if (sceneExists(req.body.id)) {
-      throw new Error();
+    if (await sceneExists(req.body.id)) {
+      throw new Error('scene exists');
     }
     postScene(req.body.id, req.body.scene, req.body.comment);
     res.send({ error: false });
+    if (req.body.isEditing) {
+      otherCache.flushAll();
+    }
   } catch (error) {
-    res.send({ error: true });
+    res.send({ error: error.message });
   }
 });

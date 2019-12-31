@@ -130,13 +130,13 @@ function SceneEditor({ state }: SceneEditorProps) {
       if (meta.publish && !parseError) {
         // start publish
         setIsPublishing(true);
-        if (state.sceneEditorIsEditing) {
+        if (!state.sceneEditorIsEditing) {
           analyticsSubmit(sceneEditorId);
         }
         postData('/api/request', {
           id: sceneEditorId,
           scene: previewedScene,
-          comment: comments,
+          comment: meta.comment,
           ...(state.sceneEditorIsEditing
             ? {
                 isEditing: state.sceneEditorIsEditing,
@@ -148,7 +148,7 @@ function SceneEditor({ state }: SceneEditorProps) {
         });
       }
     },
-    [parseError, comments, code, sceneEditorId, state.sceneEditorIsEditing]
+    [parseError, code, sceneEditorId, state.sceneEditorIsEditing]
   );
 
   const goToMainMenu = useCallback(() => {
