@@ -229,7 +229,7 @@ async function watchForVoting(request: SceneRequest) {
           null,
           request.scene,
           request.ends,
-          'closed-deny',
+          'closed-accept',
           upvotes,
           downvotes
         ),
@@ -249,6 +249,8 @@ async function watchForVoting(request: SceneRequest) {
       });
     }
 
+    message.delete();
+    deleteRequest(request.uuid);
     deleteRequestsOfLikeId(request.id);
   }, request.ends - Date.now());
 }
